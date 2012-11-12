@@ -12,7 +12,7 @@ public class SessionListener implements HttpSessionListener {
     public void sessionCreated(HttpSessionEvent event) {
         HttpSession session = event.getSession();
         try {
-            StockSim db = new StockSimDB();
+            StockSimDB db = new StockSimDB();
             session.setAttribute("db", db);
         } catch (NamingException e) {
             session.getServletContext().
