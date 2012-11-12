@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+    Remove this if you use the .htaccess -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <title>StockSim</title>
+    <meta name="description" content="" />
+    <meta name="author" content="Eric Mercer" />
+    <meta name="viewport" content="width=device-width; initial-scale=1.0" />
+
+    <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  </head>
+
+  <body>
+    <div>
+      <header>
+        <h1>StockSim</h1>
+      </header>
+      
+      <div class="content">
+        <nav>
+          <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="research.html">Research</a></li>
+            <li><a href="leaderboards.html">Leaderboards</a></li>
+          </ul>
+        </nav>
+        
+        <h3 align="center">Transaction History</h3>
+        
+        <div class="table">
+          <table>
+            <tr>
+              <th>Timestamp</th>
+              <th>Type</th>
+              <th>Stock</th>
+              <th>Number of Shares</th>
+              <th>Price</th>
+            </tr>
+            <tr>
+              <td class="gr1">2012-10-14 14:34:10</td>
+              <td class="gr1">Buy</td>
+              <td class="gr1">GOOG</td>
+              <td class="gr1">100</td>
+              <td class="gr1">$3,793.12</td>
+            </tr>
+            <tr>
+              <td class="gr1alt">2012-10-12 09:51:43</td>
+              <td class="gr1alt">Sell</td>
+              <td class="gr1alt">YHOO</td>
+              <td class="gr1alt">175</td>
+              <td class="gr1alt">$1,582.91</td>
+            </tr>
+            <tr>
+              <td class="gr1">2012-10-09 12:32:44</td>
+              <td class="gr1">Buy</td>
+              <td class="gr1">AAPL</td>
+              <td class="gr1">50</td>
+              <td class="gr1">$479.73</td>
+            </tr>
+            <tr>
+              <td class="gr1alt">2012-10-09 12:29:03</td>
+              <td class="gr1alt">Buy</td>
+              <td class="gr1alt">YHOO</td>
+              <td class="gr1alt">25</td>
+              <td class="gr1alt">$257.39</td>
+            </tr>
+            <tr>
+              <td class="gr1">2012-10-04 15:34:25</td>
+              <td class="gr1">Sell</td>
+              <td class="gr1">FB</td>
+              <td class="gr1">700</td>
+              <td class="gr1">$1,516.83</td>
+            </tr>
+          </table>
+        </div>
+          
+        <p>
+          <div align="center">
+            <fieldset align="left">
+              <legend>Show: </legend>
+                <input type="radio" value="numTransactions" checked="checked">
+                  <label>
+                    <select>
+                      <option value="1">5</option>
+                      <option value="2">10</option>
+                      <option value="3">25</option>
+                      <option value="4">50</option>
+                      <option value="5">100</option>
+                    </select> most recent transactions
+                  </label><br>
+                <input type="radio" value="numDays">
+                  <label> past
+                    <select>
+                      <option value="1">week</option>
+                      <option value="2">month</option>
+                      <option value="3">3 months</option>
+                      <option value="4">year</option>
+                    </select> of transactions
+                  </label>
+            </fieldset>    
+          </div>      
+        </p>
+        
+      </div>
+      
+      <footer>
+        <p>
+          &copy; Copyright by Eric Mercer &amp; David Liu
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

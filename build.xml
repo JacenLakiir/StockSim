@@ -1,0 +1,167 @@
+<!--
+======================================================================
+build.xml
+Thu Sep 14 2006: created by Jun Yang (junyang@cs.duke.edu)
+Tue Aug  5 2008: updated for Tomcat 6 by Jun Yang (junyang@cs.duke.edu)
+Sun Aug 28 2011: updated for Ubuntu by Jun Yang (junyang@cs.duke.edu)
+======================================================================
+-->
+
+<project name="StockSim" default="compile" basedir=".">
+
+  <property file="build.properties"/>
+
+<!--  ==================== Compilation Control Options ==================== -->
+<!--
+  These properties control option settings on the Javac compiler when it
+  is invoked using the <javac> task.
+-->
+  <property name="compile.debug"       value="true"/>
+  <property name="compile.deprecation" value="false"/>
+  <property name="compile.optimize"    value="true"/>
+
+<!-- ================== Custom Ant Task Definitions ======================= -->
+<!--
+  These properties define custom tasks for the Ant build tool that interact
+  with the manager web application installed with Tomcat.
+-->
+  <path id="deployer.classpath">
+    <fileset dir="${catalina.home}/bin">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${catalina.home}/lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <taskdef resource="org/apache/catalina/ant/catalina.tasks"
+           classpathref="deployer.classpath"/>
+
+<!-- ==================== Compilation Classpath =========================== -->
+  <path id="compile.classpath">
+
+    <!-- Include all JAR files that will be included in /WEB-INF/lib -->
+    <fileset dir="${web.home}/WEB-INF">
+      <include name="lib/*.jar"/>
+    </fileset>
+
+    <!-- Include all elements that Tomcat exposes to applications -->
+    <fileset dir="${catalina.home}/lib">
+      <include name="*.jar"/>
+    </fileset>
+
+  </path>
+
+<!-- ==================== All Target ====================================== -->
+  <target name="all" depends="clean,compile,dist,javadoc"
+   description="Clean up, then build everything"/>
+
+<!-- ==================== Clean Target ==================================== -->
+  <target name="clean"
+   description="Clean up all automatically generated files">
+    <delete dir="${build.home}"/>
+    <delete dir="${dist.home}"/>
+    <delete file="${app.name}.war"/>
+    <delete dir="${doc.home}/api"/>
+  </target>
+
+<!-- ==================== Compile Target ================================== -->
+  <target name="compile"
+   description="Compile Java sources">
+
+    <!-- Compile Java classes as necessary -->
+    <mkdir dir="${build.home}"/>
+    <javac srcdir="${src.home}"
+          destdir="${build.home}"
+            debug="${compile.debug}"
+      deprecation="${compile.deprecation}"
+         optimize="${compile.optimize}"
+includeantruntime="false">
+        <classpath refid="compile.classpath"/>
+    </javac>
+
+    <!-- Copy application resources -->
+    <copy todir="${build.home}">
+      <fileset dir="${src.home}" excludes="**/*.java"/>
+    </copy>
+
+  </target>
+
+<!-- ==================== Dist Target ===================================== -->
+  <target name="dist" depends="compile"
+   description="Create binary distribution">
+
+    <!-- Clean up first, and recreate the directory structure -->
+    <delete dir="${dist.home}"/>
+    <delete file="${app.name}.war"/>
+    <mkdir dir="${dist.home}"/>
+    <mkdir dir="${dist.home}/WEB-INF/"/>
+    <mkdir dir="${dist.home}/WEB-INF/classes"/>
+
+    <!-- Copy static content -->
+    <copy todir="${dist.home}">
+      <fileset dir="${web.home}"/>
+    </copy>
+
+    <!-- Copy deployment descriptor files and lib files (if any) -->
+    <copy todir="${dist.home}/WEB-INF">
+      <fileset dir="${web.home}/WEB-INF"/>
+    </copy>
+
+    <!-- Copy compiled files -->
+    <copy todir="${dist.home}/WEB-INF/classes">
+      <fileset dir="${build.home}"/>
+    </copy>
+
+    <!-- Create application WAR file -->
+    <jar jarfile="${app.name}.war"
+         basedir="${dist.home}"/>
+
+  </target>
+
+<!-- ==================== Javadoc Target ================================== -->
+  <target name="javadoc" depends="compile"
+   description="Create Javadoc API documentation">
+    <delete dir="${doc.home}/api"/>
+    <mkdir dir="${doc.home}"/>
+    <mkdir dir="${doc.home}/api"/>
+    <javadoc sourcepath="${src.home}"
+                destdir="${doc.home}/api"
+           packagenames="*">
+      <classpath refid="compile.classpath"/>
+    </javadoc>
+  </target>
+
+<!-- ==================== Deploy Target ================================== -->
+  <target name="deploy" depends="dist"
+   description="Deploy application to servlet container">
+    <deploy url="${manager.url}"
+       username="${manager.username}"
+       password="${manager.password}"
+           path="${app.path}"
+            war="${basedir}/${app.name}.war"/>
+  <!-- Note the use of ${basedir} to make the above absolute.  The stupid
+       ant task does not do this translation automatically; it will cause
+       tomcat to try to deploy ${app.name}.war relative to the directory
+       where it started.
+  -->
+  </target>
+
+<!-- ====================== List Target =================================== -->
+  <target name="list"
+   description="List installed applications on servlet container">
+    <list    url="${manager.url}"
+        username="${manager.username}"
+        password="${manager.password}"/>
+  </target>
+
+<!-- ==================== Undeploy Target =================================== -->
+  <target name="undeploy"
+   description="Undeploy application on servlet container">
+    <undeploy url="${manager.url}"
+         username="${manager.username}"
+         password="${manager.password}"
+             path="${app.path}"/>
+  </target>
+
+</project>

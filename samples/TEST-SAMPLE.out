@@ -1,0 +1,67 @@
+-- NOTE: some queries cannot currently be written since they rely on stock data from
+--		 Yahoo! Finance, such as stock data requests, leaderboards, and market value
+--		 calculations; these require the use of a host language such as Java or Python in
+--		 conjunction with queries to the website database, which is beyond the scope of
+--		 Milestone 1 as described in the project requirements
+-- create new account from new account form
+INSERT INTO Users VALUES('StockSimUser', 'awesome_password', 'person@gmail.com');
+INSERT 0 1
+-- create new portfolio with some user-assigned portfolio name
+INSERT INTO Portfolio VALUES('P81', 'Tech Investments', 'StockSimUser', 10000);
+INSERT 0 1
+-- perform buy/sell transaction for some number of shares for some stock
+INSERT INTO Transaction VALUES('P81', 'GOOG', 100, 37.93, 'Buy', now());
+INSERT 0 1
+-- get password associated with some username for login authentification
+SELECT password
+FROM Users
+WHERE username='StockSimUser';
+     password     
+------------------
+ awesome_password
+(1 row)
+
+-- get home page info after login
+SELECT portfolio_name
+FROM Portfolio
+WHERE username = 'User1';
+ portfolio_name 
+----------------
+ Portfolio 2
+ Portfolio 1
+(2 rows)
+
+-- retrieve info on some particular portfolio
+SELECT ticker, num_shares, avg_price_bought
+FROM Stock_Holdings
+WHERE PID='P1';
+ ticker | num_shares | avg_price_bought 
+--------+------------+------------------
+ GOOG   |          6 |           554.40
+ YHOO   |          7 |           472.00
+(2 rows)
+
+-- sort portfolio by some attribute
+SELECT ticker, num_shares, avg_price_bought
+FROM Stock_Holdings
+WHERE PID='P1'
+ORDER BY num_shares DESC;
+ ticker | num_shares | avg_price_bought 
+--------+------------+------------------
+ YHOO   |          7 |           472.00
+ GOOG   |          6 |           554.40
+(2 rows)
+
+-- retrieve some number of recent transactions or transactions within some time period
+SELECT time, type, ticker, num_shares, price
+FROM Transaction
+WHERE PID='P1'
+ORDER BY time DESC
+LIMIT 3;
+            time            | type | ticker | num_shares | price  
+----------------------------+------+--------+------------+--------
+ 2012-10-18 20:44:28.992789 | Buy  | YHOO   |          7 | 472.00
+ 2012-10-18 20:44:28.991042 | Sell | GOOG   |         -4 | 600.00
+ 2012-10-18 20:44:28.989032 | Buy  | GOOG   |          4 | 600.00
+(3 rows)
+

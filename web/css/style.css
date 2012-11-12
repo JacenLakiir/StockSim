@@ -1,0 +1,125 @@
+/* General */
+
+body {
+  color: #FFFFFF;
+  background-color: #00782D;
+  font-family: System;
+}
+
+header {
+  text-align: center;
+  font-size: 24px;
+  margin: 20px;
+}
+
+nav {
+  color: #000000;
+  text-align: center;
+  font-size: 16px;
+}
+
+nav ul {
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  position: relative;
+  margin: 0 24px 0 0;
+}
+
+nav a {
+  color: #00B945;
+}
+
+fieldset {
+  display: inline;
+}
+
+footer {
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+/* Content */
+
+.content {
+  color: #000000;
+  background-color: #FFFFFF;
+  text-align: justify;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-left: 50px;
+  margin-right: 50px;
+  border: 5px #000000;
+  border-style: solid;
+}
+
+.content a {
+  color: #00B945;
+}
+
+/* Log in */
+
+.login {
+  text-align: center;
+}
+
+.login fieldset {
+  display: inline;
+}
+
+.login label {
+    display: inline-block;
+    float: left;
+    clear: left;
+    white-space: pre;
+    text-align: right;
+}
+
+/* Tables */
+
+.table {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table {
+  margin: 0 20px 0 0;
+  display: inline-block;
+  text-align: center;
+  vertical-align: top;
+}
+
+td a {
+  color: #6A0AAB;
+  font-weight: bold;
+}
+
+th {
+  vertical-align: middle;
+  text-align: center;
+  background-color: #FFFFFF;
+  font-size: 12pt;
+  border: 1px solid;
+}
+
+td.gr1 {
+  vertical-align: middle;
+  text-align: center;
+  background-color: #EEEEEE;
+  font-size: 11pt;
+  border: 1px solid;
+}
+
+td.gr1alt {
+  vertical-align: middle;
+  text-align: center;
+  background-color: #DDDDDD;
+  font-size: 11pt;
+  border: 1px solid;
+}
