@@ -79,8 +79,6 @@ public class StockSimDB {
 	             ps.setString(2, user.password);
 	             ps.setString(3, user.email);
 	             ps.executeUpdate();
-	          
-	             ps.executeUpdate();
 	             
 	             con.commit();
 	             return;
@@ -99,7 +97,7 @@ public class StockSimDB {
 	        // Get user:
 	        ps = _preparedStatements.get(PreparedStatementID.AuthLogin);
 	        ps.setString(1, username);
-	        ps.setString(1, password);
+	        ps.setString(2, password);
 	        rs = ps.executeQuery();
 	        if (! rs.next()) {
 	            // No such user.
