@@ -3,11 +3,11 @@
 
 <body>
 
-<%@ page import="java.sql.SQLException, db.User" %>
+<%@ page import="java.sql.SQLException" %>
 
-<%-- The following locates object "db" of type "my.db.BeerDB" from the
+<%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
-     (src/my/listener/SessionListener.java) when the session was first
+     (src/listener/SessionListener.java) when the session was first
      initialized.
 --%>
 <jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
@@ -25,14 +25,14 @@
     String username = request.getParameter("username");
     String password = request.getParameter("password");
     
-    User user = new User(email, username, password);
+    /*Users user = new Users(email, username, password);
     try {
         db.updateUsers(user);
         out.println("Database updated.");
     } catch (SQLException e) {
         out.println("Sorry, I cannot modify the database!");
         out.println(e.getMessage());
-    }
+    }*/
     %>
 
 <% } %>

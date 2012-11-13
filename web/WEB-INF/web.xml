@@ -81,7 +81,6 @@
       DESCRIPTION
     </description>
     <servlet-class>RELFILEPATH</servlet-class>
-    <!--
     <init-param>
       <param-name>PARAMETER1</param-name>
       <param-value>VALUE1</param-value>
@@ -90,7 +89,7 @@
       <param-name>PARAMETER2</param-name>
       <param-value>VALUE2</param-value>
     </init-param>
-    -->
+  -->
     <!-- Load this servlet at server startup time -->
   <!--
     <load-on-startup>5</load-on-startup>
