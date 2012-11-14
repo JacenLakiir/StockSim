@@ -19,7 +19,8 @@ public class StockSimDB {
 			AuthLogin("SELECT USERNAME FROM USERS WHERE USERNAME=? AND PASSWORD=?"),
 			getTransactionHistory("SELECT * FROM TRANSACTION WHERE PID=? AND time>? ORDER BY time DESC "),
 			getStock_Holdings("SELECT * FROM STOCK_HOLDINGS WHERE PID=?"),
-			getPortfolioName("SELECT NAME FROM PORTFOLIO WHERE PID=?"),
+			getPortfolioNameByPID("SELECT PORTFOLIO_NAME FROM PORTFOLIO WHERE PID=?"),
+			getPortfolioNameByUsername("SELECT PORTFOLIO_NAME FROM PORTFOLIO WHERE USERNAME=?"),
 			PerformTransaction("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())");
 			
 	        public final String sql;
@@ -179,7 +180,7 @@ public class StockSimDB {
 	         con.setAutoCommit(false);
 	         try {
 	        	 
-	        	 ps = _preparedStatements.get(PreparedStatementID.getPortfolioName);
+	        	 ps = _preparedStatements.get(PreparedStatementID.getPortfolioNameByPID);
 	             ps.setString(1, PID);
 	             rs = ps.executeQuery();
 	             rs.next();
@@ -209,5 +210,36 @@ public class StockSimDB {
 	             if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 	             if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 	         }
+	    }
+	    
+	    public List<String> getPortfolioNames(String username) throws SQLException {
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+			List<String> portfolioNames = new ArrayList<String>();
+			
+			boolean oldAutoCommitState = con.getAutoCommit();
+			con.setAutoCommit(false);
+			
+			try {
+				ps = _preparedStatements.get(PreparedStatementID.getPortfolioNameByUsername);
+			    ps.setString(1, username);
+			    rs = ps.executeQuery();
+			    while (rs.next()) {
+			    	portfolioNames.add(rs.getString(2));
+			    }
+			    return portfolioNames;
+			} catch (SQLException e) {
+				throw e;
+			} finally {
+				// To conserve JDBC resources, be nice and call close().
+				// Although JDBC is supposed to call close() when these
+				// things get garbage-collected, the problem is that if
+				// you ever use connection pooling, if close() is not called
+				// explicitly, these resources won't be available for
+				// reuse, which can cause the connection pool to run out
+				// of its allocated resources.
+			    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+			    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+			 }	    	
 	    }
 }
