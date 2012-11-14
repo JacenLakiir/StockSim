@@ -9,10 +9,7 @@ import javax.naming.*;
 public class StockSimDB {
 
 	protected Connection con = null;
-			
-	    // Use lots of prepared statements for performance!
-	    // Java enum provides a nice way of specifying a static collection
-	    // of objects (in this case prepared statements:
+	
 	static {
         try {
             Class.forName("org.postgresql.Driver");
@@ -21,13 +18,16 @@ public class StockSimDB {
             System.exit(1);
         }
     }
+	    // Use lots of prepared statements for performance!
+	    // Java enum provides a nice way of specifying a static collection
+	    // of objects (in this case prepared statements:
 	    protected enum PreparedStatementID {
 			CreateNewUser("INSERT INTO USERS VALUES(?,?,?)"),
 			CreateNewPortfolio("INSERT INTO Portfolio VALUES(?, ?, ?, ?);"),
 			AuthLogin("SELECT USERNAME FROM USERS WHERE USERNAME=? AND PASSWORD=?"),
 			getTransactionHistory("SELECT * FROM TRANSACTION WHERE PID=? AND time>? ORDER BY time DESC "),
-			getStock_Holdings("SELECT * FROM STOCK_HOLDINGS WHERE PID=?"),
-			getPortfolioName("SELECT NAME FROM PORTFOLIO WHERE PID=?"),
+			getStock_Holdings("SELECT TICKER, NUM_SHARES, AVG_PRICE_BOUGHT FROM STOCK_HOLDINGS WHERE PID=?"),
+			getPortfolioInfo("SELECT NAME, TIME_CREATED, CASH FROM PORTFOLIO WHERE PID=?"),
 			PerformTransaction("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())");
 			
 	        public final String sql;
@@ -44,26 +44,26 @@ public class StockSimDB {
 		connect();
 	}
 	
-	  public void connect() throws NamingException, SQLException {
-	        // Is this a reconnection?  If so, disconnect first.
-	        if (con != null) disconnect();
-	        try {
-	        	String url = "jdbc:postgresql://localhost/stocksim";
-	        	Properties props = new Properties();
-	            props.setProperty("user", "ubuntu");
-	            props.setProperty("password", "reverse");
-	            con = DriverManager.getConnection(url, props);
+	public void connect() throws NamingException, SQLException {
+        // Is this a reconnection?  If so, disconnect first.
+        if (con != null) disconnect();
+        try {
+        	String url = "jdbc:postgresql://localhost/stocksim";
+        	Properties props = new Properties();
+            props.setProperty("user", "ubuntu");
+            props.setProperty("password", "reverse");
+            con = DriverManager.getConnection(url, props);
 
-	            // Prepare statements:
-	            for (PreparedStatementID i: PreparedStatementID.values()) {
-	                PreparedStatement preparedStatement = con.prepareStatement(i.sql);
-	                _preparedStatements.put(i, preparedStatement);
-	            }
-	        } catch (SQLException e) {
-	            if (con != null) disconnect();
-	            throw e;
-	        }
-	    }
+            // Prepare statements:
+            for (PreparedStatementID i: PreparedStatementID.values()) {
+                PreparedStatement preparedStatement = con.prepareStatement(i.sql);
+                _preparedStatements.put(i, preparedStatement);
+            }
+        } catch (SQLException e) {
+            if (con != null) disconnect();
+            throw e;
+        }
+    }
 
 	    public void disconnect() {
 	        // Close all prepared statements:
@@ -86,6 +86,8 @@ public class StockSimDB {
 	             ps.setString(1, user.username);
 	             ps.setString(2, user.password);
 	             ps.setString(3, user.email);
+	             ps.executeUpdate();
+	          
 	             ps.executeUpdate();
 	             
 	             con.commit();
@@ -144,8 +146,7 @@ public class StockSimDB {
 	    public ArrayList<Transaction> getTransactionHistory(String PID, Timestamp time) throws SQLException{
 	    	 PreparedStatement ps = null;
 	    	 ResultSet rs = null;
-	         boolean oldAutoCommitState = con.getAutoCommit();
-	         con.setAutoCommit(false);
+	        
 	         try {
 	        	 
 	        	 ps = _preparedStatements.get(PreparedStatementID.getTransactionHistory);
@@ -183,15 +184,14 @@ public class StockSimDB {
 	    	 PreparedStatement ps = null;
 	    	 ResultSet rs = null;
 	    	 Portfolio p;
-	         boolean oldAutoCommitState = con.getAutoCommit();
-	         con.setAutoCommit(false);
+
 	         try {
 	        	 
-	        	 ps = _preparedStatements.get(PreparedStatementID.getPortfolioName);
+	        	 ps = _preparedStatements.get(PreparedStatementID.getPortfolioInfo);
 	             ps.setString(1, PID);
 	             rs = ps.executeQuery();
 	             rs.next();
-	             p = new Portfolio(rs.getString(1));
+	             p = new Portfolio(rs.getString(1), rs.getTimestamp(2), rs.getBigDecimal(3));
 	             
 	             rs=null;
 	             ps=null;
@@ -201,19 +201,13 @@ public class StockSimDB {
 	             rs = ps.executeQuery();
 	             
 	             while (rs.next()) {
-	            	 p.addStock(rs.getString(2), rs.getInt(3), rs.getBigDecimal(4));
+	            	 p.addStock(rs.getString(1), rs.getInt(2), rs.getBigDecimal(3));
 	             }
 	             return p;
 	         } catch (SQLException e) {
 	             throw e;
 	         } finally {
-	             // To conserve JDBC resources, be nice and call close().
-	             // Although JDBC is supposed to call close() when these
-	             // things get garbage-collected, the problem is that if
-	             // you ever use connection pooling, if close() is not called
-	             // explicitly, these resources won't be available for
-	             // reuse, which can cause the connection pool to run out
-	             // of its allocated resources.
+
 	             if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 	             if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 	         }

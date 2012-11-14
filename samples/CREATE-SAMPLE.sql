@@ -25,6 +25,7 @@ CREATE TABLE Portfolio(
 	PID VARCHAR(30) NOT NULL PRIMARY KEY,
 	portfolio_name VARCHAR(30) NOT NULL,
 	username VARCHAR(30) NOT NULL REFERENCES Users(username),
+	time_created TIMESTAMP NOT NULL,
 	cash NUMERIC(1000,2) NOT NULL CHECK(cash>=0)
 );
 
@@ -103,9 +104,9 @@ INSERT INTO Users VALUES('User1', 'password', 'User1@duke.edu');
 INSERT INTO Users VALUES('User2', 'password', 'User2@duke.edu');
 INSERT INTO Users VALUES('User3', 'password', 'User3@duke.edu');
 
-INSERT INTO Portfolio VALUES('P1', 'Portfolio 1', 'User1', 10000);
-INSERT INTO Portfolio VALUES('P2', 'Portfolio 2', 'User1', 10000);
-INSERT INTO Portfolio VALUES('P3', 'Portfolio 1', 'User2', 10000);
+INSERT INTO Portfolio VALUES('P1', 'Portfolio 1', 'User1', now(), 10000);
+INSERT INTO Portfolio VALUES('P2', 'Portfolio 2', 'User1', now(), 10000);
+INSERT INTO Portfolio VALUES('P3', 'Portfolio 1', 'User2', now(), s10000);
 
 INSERT INTO Transaction VALUES('P1', 'GOOG', 3, 500, 'Buy', now());
 INSERT INTO Transaction VALUES('P1', 'GOOG', 3, 548, 'Buy', now());

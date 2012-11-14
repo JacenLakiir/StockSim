@@ -1,4 +1,4 @@
-﻿-- NOTE: some queries cannot currently be written since they rely on stock data from
+-- NOTE: some queries cannot currently be written since they rely on stock data from
 --		 Yahoo! Finance, such as stock data requests, leaderboards, and market value
 --		 calculations; these require the use of a host language such as Java or Python in
 --		 conjunction with queries to the website database, which is beyond the scope of

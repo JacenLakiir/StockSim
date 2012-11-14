@@ -29,6 +29,7 @@ public class Portfolio {
 		    return this.ticker.equals(s2.ticker);
 		  }
 		  
+		  //Not completely sure if implemented correctly, hopefully won't need to use it
 		  public void addShares(int num, BigDecimal price){
 			  
 			  double new_price = (avg_price_bought.doubleValue()*num_shares + price.doubleValue()*num)/(num+num_shares);
