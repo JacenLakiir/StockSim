@@ -25,7 +25,7 @@
 <p>
 <% if (email == null) { %>
     You need to specify an email.
-    Please <a href="<%=request.getContextPath()%>/create-account.jsp">try again</a>.
+    Please <a href="../html/newAccount.html">try again</a>.
 <% } else { %>
 
     <h3 align="center">Create Account: <%=email%></h3>
