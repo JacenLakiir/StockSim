@@ -23,7 +23,7 @@ public class StockSimDB {
 	    // of objects (in this case prepared statements:
 	    protected enum PreparedStatementID {
 			CreateNewUser("INSERT INTO USERS VALUES(?,?,?)"),
-			CreateNewPortfolio("INSERT INTO Portfolio VALUES(?, ?, ?, ?);"),
+			CreateNewPortfolio("INSERT INTO Portfolio VALUES(?, ?, ?, ?, ?);"),
 			AuthLogin("SELECT USERNAME FROM USERS WHERE USERNAME=? AND PASSWORD=?"),
 			getTransactionHistory("SELECT * FROM TRANSACTION WHERE PID=? AND time>? ORDER BY time DESC "),
 			getStock_Holdings("SELECT TICKER, NUM_SHARES, AVG_PRICE_BOUGHT FROM STOCK_HOLDINGS WHERE PID=?"),
@@ -87,6 +87,38 @@ public class StockSimDB {
 	             ps.setString(1, user.username);
 	             ps.setString(2, user.password);
 	             ps.setString(3, user.email);
+	             ps.executeUpdate();
+	             con.commit();
+	             return;
+	         } 
+	         catch (SQLException e) {
+	             try {con.rollback(); } catch (SQLException ignore) {}
+	             throw e;
+	         } finally {
+	             try {con.setAutoCommit(oldAutoCommitState); } catch (SQLException ignore) {}
+	         }
+	    }
+	    
+	    public void createPortfolio(Portfolio portfolio) throws SQLException{
+	    	 PreparedStatement ps;
+	         boolean oldAutoCommitState = con.getAutoCommit();
+	         con.setAutoCommit(false);
+	         try {
+	        	 // Generate unique PID
+	        	 // TODO: verify uniqueness and performance
+	        	 StringBuilder PID = new StringBuilder("P");
+	        	 PID.append(System.nanoTime());
+	        	 
+	        	 // Generate timestamp
+	             java.util.Date date = new java.util.Date(System.currentTimeMillis()); 
+	             java.sql.Timestamp timeCreated = new java.sql.Timestamp(date.getTime());
+	             
+	             ps = _preparedStatements.get(PreparedStatementID.CreateNewPortfolio);
+	             ps.setString(1, PID.toString());
+	             ps.setString(2, portfolio.getName());
+	             ps.setString(3, portfolio.getUsername());
+	             ps.setTimestamp(4, timeCreated);
+	             ps.setBigDecimal(5, portfolio.getCash());
 	             ps.executeUpdate();
 	             con.commit();
 	             return;

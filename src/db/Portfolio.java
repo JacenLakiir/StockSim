@@ -20,6 +20,13 @@ public class Portfolio {
 		stockHoldings = new ArrayList<Stock>();
 	}
 	
+	public Portfolio(String name, String username, BigDecimal cash) {
+		this.name = name;
+		this.username = username;
+		this.cash = cash;
+		stockHoldings = new ArrayList<Stock>();
+	}
+	
 	public Portfolio(String name, Timestamp timeCreated, BigDecimal cash) {
 		this.name = name;
 		this.timeCreated = timeCreated;
@@ -28,13 +35,10 @@ public class Portfolio {
 	}
 	
 	public Portfolio(String PID, String name, String username, Timestamp timeCreated, BigDecimal cash) {
-		this(name, timeCreated, cash);
+		this(name, username, cash);
 		this.PID = PID;
 		this.username = username;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
+		this.timeCreated = timeCreated;
 	}
 	
 	public void addStock(String ticker, int num_shares, BigDecimal avg_price_bought) {
@@ -43,6 +47,26 @@ public class Portfolio {
 			stockHoldings.get(stockHoldings.indexOf(s)).addShares(num_shares, avg_price_bought);
 		}
 		else stockHoldings.add(s);
+	}
+	
+	public String getPID() {
+		return PID;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public String getUsername() {
+		return username;
+	}
+	
+	public Timestamp getTimeCreated() {
+		return timeCreated;
+	}
+	
+	public BigDecimal getCash() {
+		return cash;
 	}
 	
 	public class Stock {
