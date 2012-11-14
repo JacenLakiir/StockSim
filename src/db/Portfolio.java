@@ -4,11 +4,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class Portfolio {
-	public class Stock<ticker,num_shares> {
+	public class Stock{
 
 		  public final String ticker;
 		  public int num_shares;
-		  public BigDecimal avg_price_bought;	
+		  public BigDecimal avg_price_bought;
+		 
 		  
 		  public Stock(String ticker, int num_shares, BigDecimal avg_price_bought) {
 		    this.ticker = ticker;
@@ -41,6 +42,8 @@ public class Portfolio {
 		}
 	public ArrayList<Stock> StockHoldings;
 	public String name;
+	public java.sql.Timestamp time_created;
+	public BigDecimal cash;
 	
 	public Portfolio(){}
 	
@@ -48,8 +51,10 @@ public class Portfolio {
 		this.name = name;
 	}
 	
-	public Portfolio(String name){
+	public Portfolio(String name, java.sql.Timestamp time, BigDecimal cash){
 		this.name=name;
+		this.time_created=time;
+		this.cash=cash;
 		StockHoldings = new ArrayList<Stock>();
 	}
 	public void addStock(String ticker, int num_shares, BigDecimal avg_price_bought){

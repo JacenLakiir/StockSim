@@ -8,7 +8,7 @@
 INSERT INTO Users VALUES('StockSimUser', 'awesome_password', 'person@gmail.com');
 
 -- create new portfolio with some user-assigned portfolio name
-INSERT INTO Portfolio VALUES('P81', 'Tech Investments', 'StockSimUser', 10000);
+INSERT INTO Portfolio VALUES('P81', 'Tech Investments', 'StockSimUser', now(), 10000);
 
 -- perform buy/sell transaction for some number of shares for some stock
 INSERT INTO Transaction VALUES('P81', 'GOOG', 100, 37.93, 'Buy', now());
