@@ -39,6 +39,7 @@
       boolean isAuthorized = db.AuthLogin(username, password);
         if (isAuthorized) {
           out.println("User credentials verified. Logging in.");
+          session.setAttribute("userID", username);
           response.sendRedirect("../html/home.html");
         }
         else {
