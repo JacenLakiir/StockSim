@@ -40,7 +40,7 @@
         if (isAuthorized) {
           out.println("User credentials verified. Logging in.");
           session.setAttribute("userID", username);
-          response.sendRedirect("../html/home.html");
+          response.sendRedirect("home.jsp");
         }
         else {
           out.println("Credentials do not match those of any known users. Login failed.");
