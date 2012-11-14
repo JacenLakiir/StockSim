@@ -56,7 +56,7 @@
   
   <footer>
     <p>
-    &copy; Copyright by Eric Mercer &amp; David Liu
+    &copy; Copyright 2012 by Eric Mercer &amp; David Liu
     </p>
   </footer>
 
