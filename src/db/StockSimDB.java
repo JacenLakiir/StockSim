@@ -88,9 +88,6 @@ public class StockSimDB {
 	             ps.setString(2, user.password);
 	             ps.setString(3, user.email);
 	             ps.executeUpdate();
-	          
-	             ps.executeUpdate();
-	             
 	             con.commit();
 	             return;
 	         } 
