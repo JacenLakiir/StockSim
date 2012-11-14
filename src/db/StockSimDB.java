@@ -223,7 +223,7 @@ public class StockSimDB {
 			    ps.setString(1, username);
 			    rs = ps.executeQuery();
 			    while (rs.next()) {
-			    	portfolioNames.add(rs.getString(2));
+			    	portfolioNames.add(rs.getString(1));
 			    }
 			    return portfolioNames;
 			} catch (SQLException e) {
