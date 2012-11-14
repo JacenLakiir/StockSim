@@ -73,7 +73,7 @@
 <%    for (int i = 0; i < portfolioNames.size(); i++) { %>
       <tr>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <a href="portfolio.html"><%=portfolioNames.get(i)%></a>
+          <a href="../html/portfolio.html"><%=portfolioNames.get(i)%></a>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
           <%--TODO: calculate market value from Yahoo! Finance data --%>
