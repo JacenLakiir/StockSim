@@ -1,30 +1,36 @@
 package db;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Portfolio {
-	
+
 	private String PID;
 	private String name;
 	private String username;
+	private Timestamp timeCreated;
 	private BigDecimal cash;
 	
 	private List<Stock> stockHoldings;
 
-	public Portfolio() {}
-	
-	public Portfolio(String name) {
-		this.name = name;
+	public Portfolio(String PID) {
+		this.PID = PID;
 		stockHoldings = new ArrayList<Stock>();
 	}
 	
-	public Portfolio(String PID, String name, String username, BigDecimal cash) {
-		this.PID = PID;
+	public Portfolio(String name, Timestamp timeCreated, BigDecimal cash) {
 		this.name = name;
-		this.username = username;
+		this.timeCreated = timeCreated;
 		this.cash = cash;
+		stockHoldings = new ArrayList<Stock>();
+	}
+	
+	public Portfolio(String PID, String name, String username, Timestamp timeCreated, BigDecimal cash) {
+		this(name, timeCreated, cash);
+		this.PID = PID;
+		this.username = username;
 	}
 	
 	public void setName(String name) {
@@ -51,6 +57,7 @@ public class Portfolio {
 		    this.avg_price_bought=avg_price_bought;
 		}
 		  
+		//Not completely sure if implemented correctly, hopefully won't need to use it
 		public void addShares(int num, BigDecimal price) {
 			double new_price = (avg_price_bought.doubleValue()*num_shares + price.doubleValue()*num)/(num+num_shares);
 			num_shares += num;

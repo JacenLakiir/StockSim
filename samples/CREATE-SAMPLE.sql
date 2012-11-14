@@ -1,4 +1,12 @@
-﻿-- destroy database
+-- destroy Database
+Drop database stocksim;
+
+--create database
+create database stocksim;
+GRANT ALL PRIVILEGES ON DATABASE stocksim to ubuntu;
+\c stocksim
+
+-- destroy tables
 DROP TABLE Users CASCADE;
 DROP TABLE Portfolio CASCADE;
 DROP TABLE Stock_Holdings CASCADE;
@@ -6,7 +14,7 @@ DROP TABLE Transaction CASCADE;
 DROP FUNCTION exec_Transaction() CASCADE;
 DROP FUNCTION check_Portfolio_Name() CASCADE;
 
--- create database
+-- create tables
 CREATE TABLE Users(
 	username VARCHAR(30) NOT NULL PRIMARY KEY CHECK(char_length(username)>=4),
 	password VARCHAR(30) NOT NULL CHECK(char_length(password)>=5),
@@ -90,7 +98,7 @@ CREATE TRIGGER check_Portfolio_Name
 BEFORE INSERT ON Portfolio
 FOR EACH ROW EXECUTE PROCEDURE check_Portfolio_Name(); 
 
--- populate database
+-- populate tables
 INSERT INTO Users VALUES('User1', 'password', 'User1@duke.edu');
 INSERT INTO Users VALUES('User2', 'password', 'User2@duke.edu');
 INSERT INTO Users VALUES('User3', 'password', 'User3@duke.edu');

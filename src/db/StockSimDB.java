@@ -13,6 +13,14 @@ public class StockSimDB {
 	    // Use lots of prepared statements for performance!
 	    // Java enum provides a nice way of specifying a static collection
 	    // of objects (in this case prepared statements:
+	static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error loading JDBC driver: " + e.getMessage());
+            System.exit(1);
+        }
+    }
 	    protected enum PreparedStatementID {
 			CreateNewUser("INSERT INTO USERS VALUES(?,?,?)"),
 			CreateNewPortfolio("INSERT INTO Portfolio VALUES(?, ?, ?, ?);"),
@@ -41,11 +49,11 @@ public class StockSimDB {
 	        // Is this a reconnection?  If so, disconnect first.
 	        if (con != null) disconnect();
 	        try {
-	            // Use JNDI to look up a data source created by Tomcat:
-	            Context context = new InitialContext();
-	            Context envContext = (Context)context.lookup("java:/comp/env");
-	            DataSource dataSource = (DataSource)envContext.lookup("jdbc/dbcourse");
-	            con = dataSource.getConnection();
+	        	String url = "jdbc:postgresql://localhost/stocksim";
+	        	Properties props = new Properties();
+	            props.setProperty("user", "ubuntu");
+	            props.setProperty("password", "reverse");
+	            con = DriverManager.getConnection(url, props);
 
 	            // Prepare statements:
 	            for (PreparedStatementID i: PreparedStatementID.values()) {
