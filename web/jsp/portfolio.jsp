@@ -32,10 +32,8 @@
             <li><a href="../html/leaderboards.html">Leaderboards</a></li>
           </ul>
         </nav>
-        
-        <h3 align="center">Home</h3>
-        
-<%@ page import="java.sql.SQLException, java.util.List, java.util.Collections" %>
+
+<%@ page import="java.sql.SQLException, java.util.List, db.Portfolio.Stock" %>
 
 <%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
@@ -45,40 +43,46 @@
 <jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
 
 <%  try {
-    String username = (String) session.getAttribute("userID");
+      String PID = (String) request.getParameter("pid");
+    String portfolioName = db.getPortfolioName(PID);
 %>
-        <p align="center">
-        Welcome, <%=username %>!        
-        </p>
+        <h3 align="center"><%=portfolioName %></h3>      
 <%  } catch (Exception e) { %>
     <p>
 <%    
-    out.println("Could not retrieve userID for current session.");
+    out.println("Could not retrieve portfolio for current session.");
     out.println(e.getMessage());
 %>
     </p>    
 <%  } %>
         
 <%  try {
-    String username = (String) session.getAttribute("userID");
-    List<String> portfolioNames = db.getPortfolioNames(username);
-    Collections.sort(portfolioNames);
+      String username = (String) session.getAttribute("userID");
+      String PID = (String) request.getParameter("pid");
+      List<Stock> stockHoldings = db.getStock_Holdings(PID);
+      if (stockHoldings == null) {
 %>
+        <p>
+<%        out.println("Empty portfolio - no stocks held."); %>
+      </p>
+<%    } %>
     <div class="table">
       <table>
         <tr>
-          <th>Portfolio</th>
-          <th>Market Value</th>
+          <th>Stock</th>
+          <th>Number of Shares</th>
+          <th>Current Value</th>
         </tr>
-<%    for (int i = 0; i < portfolioNames.size(); i++) { 
-    String PID = db.getPID(username, portfolioNames.get(i));
-%>
+<%    for (int i = 0; i < stockHoldings.size(); i++) { %>
       <tr>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <a href="portfolio.jsp?pid=<%=PID%>"><%=portfolioNames.get(i)%></a>
+          <%=stockHoldings.get(i).getTicker() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%--TODO: calculate market value from Yahoo! Finance data --%>
+          <%=stockHoldings.get(i).getNumShares() %>
+        </td>
+        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+          <%--TODO: calculate current value from Yahoo! Finance data --%>
           $0
         </td>
       </tr>
@@ -88,18 +92,35 @@
 <%  } catch (SQLException e) { %>
     <p>
 <%    
-    out.println("Could not retrieve the user's portfolios.");
+    out.println("Could not retrieve the stock holdings for this portfolio.");
     out.println(e.getMessage());
 %>
     </p>  
 <%  } %>
-        <p>
-          <div align="center">
-            <form>
-              <input type="button" onClick="parent.location='../html/newPortfolio.html'" value="Create New Portfolio">
-            </form>
-          </div>
+
+    <%--TODO: figure how to toggle sorts --%>        
+        <p align="center">
+          <label>Sort portfolio by: </label>
+              <select id="sorts">
+                <option value="1">stock symbol</option>
+                <option value="2">num. shares</option>
+                <option value="3">current value</option>
+              </select>
         </p>
+        
+        <%--TODO: figure out how to calculate total market value --%>
+        <p align="center">
+          Total Market Value: $0
+        </p>
+        
+        <nav>
+          <ul>
+            <li><a href="marketplace.html">Buy/Sell Stock</a></li>
+            <li><a href="history.html">Transaction History</a></li>
+            <li><a href="performance.html">Performance</a></li>
+          </ul>
+        </nav>
+        
       </div>
       
       <footer>

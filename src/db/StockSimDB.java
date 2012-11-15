@@ -6,6 +6,8 @@ import javax.sql.*;
 
 import javax.naming.*;
 
+import db.Portfolio.Stock;
+
 public class StockSimDB {
 
 	protected Connection con = null;
@@ -26,10 +28,12 @@ public class StockSimDB {
 			CreateNewPortfolio("INSERT INTO Portfolio VALUES(?, ?, ?, ?, ?);"),
 			AuthLogin("SELECT USERNAME FROM USERS WHERE USERNAME=? AND PASSWORD=?"),
 			getTransactionHistory("SELECT * FROM TRANSACTION WHERE PID=? AND time>? ORDER BY time DESC "),
+			PerformTransaction("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())"),
 			getStock_Holdings("SELECT TICKER, NUM_SHARES, AVG_PRICE_BOUGHT FROM STOCK_HOLDINGS WHERE PID=?"),
-			getPortfolioNameByUsername("SELECT PORTFOLIO_NAME FROM PORTFOLIO WHERE USERNAME=?"),
-			getPortfolioInfo("SELECT NAME, TIME_CREATED, CASH FROM PORTFOLIO WHERE PID=?"),
-			PerformTransaction("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())");
+			getPortfolioNames("SELECT PORTFOLIO_NAME FROM PORTFOLIO WHERE USERNAME=?"),
+			getPortfolioInfo("SELECT PORTFOLIO_NAME, TIME_CREATED, CASH FROM PORTFOLIO WHERE PID=?"),
+			getPID("SELECT PID FROM PORTFOLIO WHERE USERNAME=? AND PORTFOLIO_NAME=?"),
+			getPortfolioNameByPID("SELECT PORTFOLIO_NAME FROM PORTFOLIO WHERE PID=?");
 			
 	        public final String sql;
 	        PreparedStatementID(String sql) {
@@ -210,33 +214,29 @@ public class StockSimDB {
 	         }
 	    }
 	    
-	    public Portfolio getStock_Holdings(String PID) throws SQLException{
+	    public List<Stock> getStock_Holdings(String PID) throws SQLException{
 	    	 PreparedStatement ps = null;
 	    	 ResultSet rs = null;
-	    	 Portfolio p;
+	    	 Portfolio p = null;
 
 	         try {
 	        	 ps = _preparedStatements.get(PreparedStatementID.getPortfolioInfo);
 	             ps.setString(1, PID);
 	             rs = ps.executeQuery();
-	             rs.next();
-	             p = new Portfolio(rs.getString(1), rs.getTimestamp(2), rs.getBigDecimal(3));
-	             
-	             rs=null;
-	             ps=null;
+	             while (rs.next()) {
+		             p = new Portfolio(rs.getString(1), rs.getTimestamp(2), rs.getBigDecimal(3));
+	             }
 	             
 	             ps = _preparedStatements.get(PreparedStatementID.getStock_Holdings);
 	             ps.setString(1, PID);
 	             rs = ps.executeQuery();
-	             
 	             while (rs.next()) {
 	            	 p.addStock(rs.getString(1), rs.getInt(2), rs.getBigDecimal(3));
 	             }
-	             return p;
+	             return p.getStockHoldings();
 	         } catch (SQLException e) {
 	             throw e;
 	         } finally {
-
 	             if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 	             if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 	         }
@@ -248,13 +248,68 @@ public class StockSimDB {
 			List<String> portfolioNames = new ArrayList<String>();
 			
 			try {
-				ps = _preparedStatements.get(PreparedStatementID.getPortfolioNameByUsername);
+				ps = _preparedStatements.get(PreparedStatementID.getPortfolioNames);
 			    ps.setString(1, username);
 			    rs = ps.executeQuery();
 			    while (rs.next()) {
 			    	portfolioNames.add(rs.getString(1));
 			    }
 			    return portfolioNames;
+			} catch (SQLException e) {
+				throw e;
+			} finally {
+				// To conserve JDBC resources, be nice and call close().
+				// Although JDBC is supposed to call close() when these
+				// things get garbage-collected, the problem is that if
+				// you ever use connection pooling, if close() is not called
+				// explicitly, these resources won't be available for
+				// reuse, which can cause the connection pool to run out
+				// of its allocated resources.
+			    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+			    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+			 }	    	
+	    }
+	    
+	    public String getPID(String username, String portfolioName) throws SQLException {
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+			String PID = null;
+			try {
+				ps = _preparedStatements.get(PreparedStatementID.getPID);
+			    ps.setString(1, username);
+			    ps.setString(2, portfolioName);
+			    rs = ps.executeQuery();
+			    while (rs.next()) {
+			    	PID = rs.getString(1);
+			    }
+			    return PID;
+			} catch (SQLException e) {
+				throw e;
+			} finally {
+				// To conserve JDBC resources, be nice and call close().
+				// Although JDBC is supposed to call close() when these
+				// things get garbage-collected, the problem is that if
+				// you ever use connection pooling, if close() is not called
+				// explicitly, these resources won't be available for
+				// reuse, which can cause the connection pool to run out
+				// of its allocated resources.
+			    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+			    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+			 }	    	
+	    }
+	    
+	    public String getPortfolioName(String PID) throws SQLException {
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+			String portfolioName = null;
+			try {
+				ps = _preparedStatements.get(PreparedStatementID.getPortfolioNameByPID);
+			    ps.setString(1, PID);
+			    rs = ps.executeQuery();
+			    while (rs.next()) {
+			    	portfolioName = rs.getString(1);
+			    }
+			    return portfolioName;
 			} catch (SQLException e) {
 				throw e;
 			} finally {

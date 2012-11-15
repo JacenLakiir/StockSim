@@ -3,6 +3,7 @@ package db;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Portfolio {
@@ -69,6 +70,10 @@ public class Portfolio {
 		return cash;
 	}
 	
+	public List<Stock> getStockHoldings() {
+		return Collections.unmodifiableList(stockHoldings);
+	}
+	
 	public class Stock {
 
 		private final String ticker;
@@ -99,6 +104,14 @@ public class Portfolio {
 		    if (!(o instanceof Stock)) return false;
 		    Stock s2 = (Stock) o;
 		    return this.ticker.equals(s2.ticker);
+		}
+		
+		public String getTicker() {
+			return ticker;
+		}
+		
+		public int getNumShares() {
+			return num_shares;
 		}
 	}
 }
