@@ -33,13 +33,13 @@ public class ProductionDatasetGenerator {
 	public static void main(String args[]) {
 		ProductionDatasetGenerator pdg = new ProductionDatasetGenerator();
 		try {
-			pdg.make_Users(NUM_USERS);
+			pdg.makeUsers(NUM_USERS);
 		} catch (IOException e1) {
 			System.out.println("Failed to make Users");
 			e1.printStackTrace();
 		}
 		try {
-			pdg.make_Portfolios(MAX_PORTFOLIOS);
+			pdg.makePortfolios(MAX_PORTFOLIOS);
 		} catch (Exception e) {
 			System.out.println("Failed to make Portfolios");
 			e.printStackTrace();
@@ -59,32 +59,55 @@ public class ProductionDatasetGenerator {
 		}
 	}
 
-	public void make_Users(int num_users) throws IOException {
-		for (int i = 0; i < num_users; i++) {
-			bw.write("INSERT INTO Users VALUES('User" + i + "', 'password', 'User" + i + "@duke.edu');\n");
+	public void makeUsers(int numUsers) throws IOException {
+		for (int i = 0; i < numUsers; i++) {
+			StringBuilder insertion = new StringBuilder("INSERT INTO Users VALUES('User");
+			insertion.append(i);
+			insertion.append("', 'password', 'User");
+			insertion.append(i);
+			insertion.append("@duke.edu');\n");
+			bw.write(insertion.toString());
 		}
 	}
 
-	public void make_Portfolios(int max_Portfolios) throws Exception {
-		int id = 0;
+	public void makePortfolios(int maxPortfolios) throws Exception {
 		Random randomTransactionSeed = new Random(30);
+		int id = 0;
 		for (int i = 0; i < NUM_USERS; i++) {
-			int n = rand.nextInt(max_Portfolios + 1);
+			int n = rand.nextInt(maxPortfolios + 1);
 			for (int j = 0; j < n; j++) {
-				bw.write("INSERT INTO Portfolio VALUES('P" + id + "', 'Portfolio " + j + "', 'User" + i + "', now(), 10000);" + "\n");
-				make_Transactions(SAMPLE_TICKERS, "P" + id, randomTransactionSeed);
+				StringBuilder insertion = new StringBuilder("INSERT INTO Portfolio VALUES('P");
+				insertion.append(id);
+				insertion.append("', 'Portfolio ");
+				insertion.append(j);
+				insertion.append("', 'User");
+				insertion.append(i);
+				insertion.append("', now(), 10000);\n");
+				bw.write(insertion.toString());
+				
+				makeTransactions("P" + id, randomTransactionSeed);
 				id++;
 			}
 		}
 	}
 
-	public void make_Transactions(List<String> tickers, String PID, Random seed)
+	public void makeTransactions(String PID, Random seed)
 			throws Exception {
-		for (int i = 0; i < tickers.size(); i++) {
-			String ticker = tickers.get(i);
-			int num_shares = seed.nextInt(20);
+		for (int i = 0; i < SAMPLE_TICKERS.size(); i++) {
+			String ticker = SAMPLE_TICKERS.get(i);
+			int numShares = seed.nextInt(20);
 			BigDecimal price = YAPI_Reader.getPrice(ticker);
-			bw.write("INSERT INTO Transaction VALUES('" + PID + "', '" + ticker + "', " + num_shares + ", " + price + ", 'Buy', now());\n");
+			
+			StringBuilder insertion = new StringBuilder("INSERT INTO Transaction VALUES('");
+			insertion.append(PID);
+			insertion.append("', '");
+			insertion.append(ticker);
+			insertion.append("', ");
+			insertion.append(numShares);
+			insertion.append(", ");
+			insertion.append(price);
+			insertion.append(", 'Buy', now());\n");
+			bw.write(insertion.toString());
 		}
 	}
 
