@@ -1,12 +1,11 @@
 package db;
+
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 import javax.sql.*;
 
 import javax.naming.*;
-
-import db.Portfolio.Stock;
 
 public class StockSimDB {
 
@@ -214,7 +213,7 @@ public class StockSimDB {
 	         }
 	    }
 	    
-	    public List<Stock> getStock_Holdings(String PID) throws SQLException{
+	    public Portfolio getStock_Holdings(String PID) throws SQLException{
 	    	 PreparedStatement ps = null;
 	    	 ResultSet rs = null;
 	    	 Portfolio p = null;
@@ -233,7 +232,7 @@ public class StockSimDB {
 	             while (rs.next()) {
 	            	 p.addStock(rs.getString(1), rs.getInt(2), rs.getBigDecimal(3));
 	             }
-	             return p.getStockHoldings();
+	             return p;
 	         } catch (SQLException e) {
 	             throw e;
 	         } finally {
@@ -293,8 +292,8 @@ public class StockSimDB {
 				// explicitly, these resources won't be available for
 				// reuse, which can cause the connection pool to run out
 				// of its allocated resources.
-			    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
-			    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+			    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+			    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 			 }	    	
 	    }
 	    
@@ -320,8 +319,8 @@ public class StockSimDB {
 				// explicitly, these resources won't be available for
 				// reuse, which can cause the connection pool to run out
 				// of its allocated resources.
-			    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
-			    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+			    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+			    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 			 }	    	
 	    }
 }

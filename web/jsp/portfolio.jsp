@@ -33,7 +33,7 @@
           </ul>
         </nav>
 
-<%@ page import="java.sql.SQLException, java.util.List, db.Portfolio.Stock" %>
+<%@ page import="java.sql.SQLException, java.util.List, java.util.ArrayList, java.math.BigDecimal, db.Portfolio, db.Portfolio.Stock, db.YAPI_Reader" %>
 
 <%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
@@ -59,13 +59,20 @@
 <%  try {
       String username = (String) session.getAttribute("userID");
       String PID = (String) request.getParameter("pid");
-      List<Stock> stockHoldings = db.getStock_Holdings(PID);
+      Portfolio portfolio = db.getStock_Holdings(PID);
+      List<Stock> stockHoldings = portfolio.getStockHoldings();
       if (stockHoldings == null) {
 %>
         <p>
 <%        out.println("Empty portfolio - no stocks held."); %>
       </p>
-<%    } %>
+<%    }
+      List<String> tickers = new ArrayList<String>();
+      for (int i = 0; i < stockHoldings.size(); i++) {
+        tickers.add(stockHoldings.get(i).getTicker());
+      }
+      List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
+%>
     <div class="table">
       <table>
         <tr>
@@ -73,7 +80,8 @@
           <th>Number of Shares</th>
           <th>Current Value</th>
         </tr>
-<%    for (int i = 0; i < stockHoldings.size(); i++) { %>
+<%    double totalMarketValue = 0;
+    for (int i = 0; i < stockHoldings.size(); i++) { %>
       <tr>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
           <%=stockHoldings.get(i).getTicker() %>
@@ -82,13 +90,30 @@
           <%=stockHoldings.get(i).getNumShares() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%--TODO: calculate current value from Yahoo! Finance data --%>
-          $0
+<%      double marketValue = stockHoldings.get(i).getNumShares() * prices.get(i).doubleValue();
+      totalMarketValue += marketValue;
+%>
+      $<%=String.format("%.2f", marketValue) %>
         </td>
       </tr>
 <%    } %>
       </table>
     </div>
+    
+      <%--TODO: figure how to toggle sorts --%>        
+      <p align="center">
+        <label>Sort portfolio by: </label>
+          <select id="sorts">
+            <option value="1">stock symbol</option>
+            <option value="2">num. shares</option>
+            <option value="3">current value</option>
+          </select>
+      </p>
+        
+      <p align="center">
+        Cash Remaining: $<%=portfolio.getCash()%><br>
+        Total Market Value: $<%=String.format("%.2f", totalMarketValue + portfolio.getCash().doubleValue()) %>
+      </p>
 <%  } catch (SQLException e) { %>
     <p>
 <%    
@@ -97,21 +122,6 @@
 %>
     </p>  
 <%  } %>
-
-    <%--TODO: figure how to toggle sorts --%>        
-        <p align="center">
-          <label>Sort portfolio by: </label>
-              <select id="sorts">
-                <option value="1">stock symbol</option>
-                <option value="2">num. shares</option>
-                <option value="3">current value</option>
-              </select>
-        </p>
-        
-        <%--TODO: figure out how to calculate total market value --%>
-        <p align="center">
-          Total Market Value: $0
-        </p>
         
         <nav>
           <ul>
