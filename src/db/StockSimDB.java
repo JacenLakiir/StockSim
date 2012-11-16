@@ -147,7 +147,6 @@ public class StockSimDB {
 	            return false;
 	        }
 	        return true;
-	        
 	    }
 	    
 	    public void Perform_Transaction(String PID, String ticker, int num_shares, BigDecimal price, String type)
@@ -208,8 +207,8 @@ public class StockSimDB {
 	             // explicitly, these resources won't be available for
 	             // reuse, which can cause the connection pool to run out
 	             // of its allocated resources.
-	             if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
-	             if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+//	             if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+//	             if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 	         }
 	    }
 	    
@@ -236,8 +235,8 @@ public class StockSimDB {
 	         } catch (SQLException e) {
 	             throw e;
 	         } finally {
-	             if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
-	             if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+//	             if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+//	             if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 	         }
 	    }
 	    
@@ -264,8 +263,8 @@ public class StockSimDB {
 				// explicitly, these resources won't be available for
 				// reuse, which can cause the connection pool to run out
 				// of its allocated resources.
-			    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
-			    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+//			    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+//			    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 			 }	    	
 	    }
 	    
