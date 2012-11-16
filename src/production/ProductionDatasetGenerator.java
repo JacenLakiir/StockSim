@@ -26,7 +26,7 @@ public class ProductionDatasetGenerator {
 		SAMPLE_TICKERS.add("MSFT");
 	}
 	
-	private File output = new File("samples/PRODUCTION-SAMPLE.sql");
+	private File output = new File("productions/CREATE-PRODUCTION.sql");
 	private Random rand = new Random(55);
 	private BufferedWriter bw;
 	
