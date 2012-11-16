@@ -35,7 +35,7 @@
         
         <h3 align="center">Home</h3>
         
-<%@ page import="java.sql.SQLException, java.util.List, java.util.Collections" %>
+<%@ page import="java.sql.SQLException, java.util.Collections, java.util.List, java.util.ArrayList, java.math.BigDecimal, db.Portfolio, db.Portfolio.Stock, db.Portfolio.NameComparator, db.YAPI_Reader" %>
 
 <%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
@@ -61,25 +61,43 @@
         
 <%  try {
     String username = (String) session.getAttribute("userID");
-    List<String> portfolioNames = db.getPortfolioNames(username);
-    Collections.sort(portfolioNames);
+    List<Portfolio> allPortfolios = db.getAllPortfolios(username);
+    Collections.sort(allPortfolios, new Portfolio.NameComparator());
 %>
     <div class="table">
       <table>
         <tr>
           <th>Portfolio</th>
+          <th>Cash</th>
           <th>Market Value</th>
         </tr>
-<%    for (int i = 0; i < portfolioNames.size(); i++) { 
-    String PID = db.getPID(username, portfolioNames.get(i));
+<%    for (int i = 0; i < allPortfolios.size(); i++) {
+        double totalMarketValue = allPortfolios.get(i).getCash().doubleValue();
+        String PID = allPortfolios.get(i).getPID();
+        Portfolio portfolio = db.getStock_Holdings(PID);
+        List<Stock> stockHoldings = portfolio.getStockHoldings();
+       
+        List<String> tickers = new ArrayList<String>();
+        for (int j = 0; j < stockHoldings.size(); j++) {
+          tickers.add(stockHoldings.get(j).getTicker());
+        }
+        
+        if (tickers.size() > 0) {
+          List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
+          for (int j = 0; j < stockHoldings.size(); j++) {
+        	  totalMarketValue += stockHoldings.get(j).getNumShares() * prices.get(j).doubleValue();
+          }
+        }
 %>
       <tr>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <a href="portfolio.jsp?pid=<%=PID%>"><%=portfolioNames.get(i)%></a>
+          <a href="portfolio.jsp?pid=<%=PID%>"><%=allPortfolios.get(i).getName()%></a>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%--TODO: calculate market value from Yahoo! Finance data --%>
-          $0
+          <%=allPortfolios.get(i).getCash() %>
+        </td>
+        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+          <%=String.format("%.2f", totalMarketValue) %>
         </td>
       </tr>
 <%    } %>

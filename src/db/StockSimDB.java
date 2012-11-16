@@ -32,6 +32,7 @@ public class StockSimDB {
 			getPortfolioNames("SELECT PORTFOLIO_NAME FROM PORTFOLIO WHERE USERNAME=?"),
 			getPortfolioInfo("SELECT PORTFOLIO_NAME, TIME_CREATED, CASH FROM PORTFOLIO WHERE PID=?"),
 			getPID("SELECT PID FROM PORTFOLIO WHERE USERNAME=? AND PORTFOLIO_NAME=?"),
+			getAllPortfolios("SELECT PID, PORTFOLIO_NAME, USERNAME, TIME_CREATED, CASH FROM PORTFOLIO WHERE USERNAME=?"),
 			getPortfolioNameByPID("SELECT PORTFOLIO_NAME FROM PORTFOLIO WHERE PID=?");
 			
 	        public final String sql;
@@ -281,6 +282,34 @@ public class StockSimDB {
 			    	PID = rs.getString(1);
 			    }
 			    return PID;
+			} catch (SQLException e) {
+				throw e;
+			} finally {
+				// To conserve JDBC resources, be nice and call close().
+				// Although JDBC is supposed to call close() when these
+				// things get garbage-collected, the problem is that if
+				// you ever use connection pooling, if close() is not called
+				// explicitly, these resources won't be available for
+				// reuse, which can cause the connection pool to run out
+				// of its allocated resources.
+			    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+			    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+			 }	    	
+	    }
+	    
+	    public List<Portfolio> getAllPortfolios(String username) throws SQLException {
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+			List<Portfolio> allPortfolios = new ArrayList<Portfolio>();
+			try {
+				ps = _preparedStatements.get(PreparedStatementID.getAllPortfolios);
+			    ps.setString(1, username);
+			    rs = ps.executeQuery();
+			    while (rs.next()) {
+			        Portfolio p = new Portfolio(rs.getString(1), rs.getString(2), rs.getString(3), rs.getTimestamp(4), rs.getBigDecimal(5));
+			    	allPortfolios.add(p);
+			    }
+			    return allPortfolios;
 			} catch (SQLException e) {
 				throw e;
 			} finally {

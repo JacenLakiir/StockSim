@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Portfolio {
@@ -50,6 +51,13 @@ public class Portfolio {
 		else stockHoldings.add(s);
 	}
 	
+	public static class NameComparator implements Comparator<Portfolio> {
+		@Override
+		public int compare(Portfolio p1, Portfolio p2) {
+			return p1.getName().compareTo(p2.getName());
+		}
+	}
+
 	public String getPID() {
 		return PID;
 	}
