@@ -4,28 +4,23 @@
 by Eric Mercer & David Liu
 ==========================
 
-Our sample database creation and query scripts can be run in PostgreSQL on the class virtual machine. They are located in the 'samples' folder.
+Our production dataset can be created by running 'ProductionDatasetGenerator.java' located in the 'src/production' folder. This will create a file called CREATE-PRODUCTION.sql in the top-level 'productions' folder. From this folder, all the database scripts can be executed.
 
-To create and load the sample database, run:
-	psql -af CREATE-SAMPLE.sql > CREATE-SAMPLE.out
+To create the database schema, run:
+  psql -af CREATE-DATABASE.sql
 
-To run sample database queries for supplying dynamic web content, run:
-	psql -af TEST-SAMPLE.sql > TEST-SAMPLE.out
+To load the production dataset into the database, run:
+  psql -af CREATE-PRODUCTION.sql
 
-To view the output of the sample database query script, open 'TEST-SAMPLE.out'.
+To run sample database queries on the production dataset, run:
+  psql -af TEST-PRODUCTION.sql > TEST-PRODUCTION.out
 
-----------
-
-A canned demo version of the website can be found in the 'web' folder.
-
-To view the login / account-creation process, open index.html and then follow the "First Time? ..." link.
-
-To view the rest of the website (post-login), open home.html and navigate from there. Note that some URLs are dead (do nothing) and that all pages are static and use placeholder data.
+To view the output of the sample database query script, open 'TEST-PRODUCTION.out'.
 
 ----------
 
-Planned application/database stack:
-  - Tomcat
-  - PostgreSQL
-  - Java/JSP/Servlets/JDBC
-  - HTML/CSS
+To view the website-in-progress on the virtual machine, run 'ant deploy' and open 'tomcat.my.net/stocksim/' in Chromium.
+
+Login as 'User#' where # is between 0 and 99 (inclusive). The password is 'password'.
+
+Note that some parts of the website have not yet been implemented and are still static / using mock data.
