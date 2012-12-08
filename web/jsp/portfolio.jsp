@@ -29,7 +29,7 @@
           <ul>
             <li><a href="home.jsp">Home</a></li>
             <li><a href="../html/research.html">Research</a></li>
-            <li><a href="../html/leaderboards.html">Leaderboards</a></li>
+            <li><a href="leaderboards.jsp">Leaderboards</a></li>
           </ul>
         </nav>
 

@@ -376,16 +376,8 @@ public class StockSimDB {
 		} catch (SQLException e) {
 			throw e;
 		} finally {
-			// To conserve JDBC resources, be nice and call close().
-			// Although JDBC is supposed to call close() when these
-			// things get garbage-collected, the problem is that if
-			// you ever use connection pooling, if close() is not called
-			// explicitly, these resources won't be available for
-			// reuse, which can cause the connection pool to run out
-			// of its allocated resources.
-		    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
-		    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
-    	
-    }
+//		    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+//		    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+		}
     }
 }

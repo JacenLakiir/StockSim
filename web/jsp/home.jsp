@@ -29,7 +29,7 @@
           <ul>
             <li><a href="home.jsp">Home</a></li>
             <li><a href="../html/research.html">Research</a></li>
-            <li><a href="../html/leaderboards.html">Leaderboards</a></li>
+            <li><a href="leaderboards.jsp">Leaderboards</a></li>
           </ul>
         </nav>
         
@@ -85,7 +85,7 @@
         if (tickers.size() > 0) {
           List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
           for (int j = 0; j < stockHoldings.size(); j++) {
-        	  totalMarketValue += stockHoldings.get(j).getNumShares() * prices.get(j).doubleValue();
+            totalMarketValue += stockHoldings.get(j).getNumShares() * prices.get(j).doubleValue();
           }
         }
 %>

@@ -28,8 +28,8 @@
         <nav>
           <ul>
             <li><a href="home.jsp">Home</a></li>
-            <li><a href="research.html">Research</a></li>
-            <li><a href="leaderboards.html">Leaderboards</a></li>
+            <li><a href="../html/research.html">Research</a></li>
+            <li><a href="leaderboards.jsp">Leaderboards</a></li>
           </ul>
         </nav>
         
@@ -74,7 +74,7 @@
               <td class="gr1"><%=t.getType() %></td>
               <td class="gr1"><%=t.getTicker() %></td>
               <td class="gr1"><%=t.getNumShares() %></td>
-              <td class="gr1"><%=t.getPrice() %></td>
+              <td class="gr1">$<%=t.getPrice() %></td>
             </tr>
 <%      } %>
           </table>
