@@ -37,6 +37,11 @@ CREATE TABLE Stock_Holdings(
   PRIMARY KEY(PID, Ticker)
 );
 
+CREATE TABLE Stock_Prices(
+  ticker VARCHAR(10) NOT NULL,
+  price NUMERIC(1000,2) NOT NULL
+);
+
 CREATE TABLE Transaction(
   PID VARCHAR(30) REFERENCES Portfolio(PID),
   ticker VARCHAR(10) NOT NULL,
@@ -74,7 +79,11 @@ CREATE FUNCTION exec_Transaction() RETURNS trigger AS $exec_Transaction$
           WHERE PID=new.PID AND ticker=new.ticker;
       END IF;
         END IF;
-  
+  	
+    IF NOT EXISTS (SELECT * FROM Stock_Prices WHERE ticker=new.ticker) THEN
+    	INSERT INTO Stock_Prices VALUES (new.ticker, new.price);
+    	END IF;
+    	
     DELETE FROM Stock_Holdings WHERE num_shares=0;
 
       RETURN NEW;
@@ -90,6 +99,7 @@ CREATE FUNCTION check_Portfolio_Name() RETURNS trigger AS $check_Portfolio_Name$
         RETURN NEW;
     END;
 $check_Portfolio_Name$ LANGUAGE plpgsql;
+
 
 CREATE TRIGGER exec_Transaction
 AFTER INSERT OR UPDATE ON Transaction
