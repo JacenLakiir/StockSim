@@ -94,10 +94,10 @@
           <a href="portfolio.jsp?pid=<%=PID%>"><%=allPortfolios.get(i).getName()%></a>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=allPortfolios.get(i).getCash() %>
+          $<%=allPortfolios.get(i).getCash() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=String.format("%.2f", totalMarketValue) %>
+          $<%=String.format("%.2f", totalMarketValue) %>
         </td>
       </tr>
 <%    } %>
