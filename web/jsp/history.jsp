@@ -27,7 +27,7 @@
       <div class="content">
         <nav>
           <ul>
-            <li><a href="../jsp/home.jsp">Home</a></li>
+            <li><a href="home.jsp">Home</a></li>
             <li><a href="research.html">Research</a></li>
             <li><a href="leaderboards.html">Leaderboards</a></li>
           </ul>
@@ -35,6 +35,27 @@
         
         <h3 align="center">Transaction History</h3>
         
+    
+<%@ page import="java.sql.SQLException, java.util.List, java.math.BigDecimal, db.Transaction" %>
+
+<%-- The following locates object "db" of type "db.StockSimDB" from the
+     current session.  We have created this object in the listener
+     (src/listener/SessionListener.java) when the session was first
+     initialized.
+--%>
+<jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
+        
+<%  try {
+      String PID = (String) request.getParameter("pid");
+      List<Transaction> history = db.getTransactionHistoryByNumber(PID, 5);
+      if (history == null || history.size() == 0) {
+%>
+        <p>
+<%        out.println("Empty history - no transactions performed yet."); %>
+        </p>
+<%    } else { %>
+
+        <p>
         <div class="table">
           <table>
             <tr>
@@ -44,41 +65,18 @@
               <th>Number of Shares</th>
               <th>Price</th>
             </tr>
+
+<%        for (int i = 0; i < history.size(); i++) { 
+        Transaction t = history.get(i);
+%>
             <tr>
-              <td class="gr1">2012-10-14 14:34:10</td>
-              <td class="gr1">Buy</td>
-              <td class="gr1">GOOG</td>
-              <td class="gr1">100</td>
-              <td class="gr1">$3,793.12</td>
+              <td class="gr1"><%=t.getTime()%></td>
+              <td class="gr1"><%=t.getType() %></td>
+              <td class="gr1"><%=t.getTicker() %></td>
+              <td class="gr1"><%=t.getNumShares() %></td>
+              <td class="gr1"><%=t.getPrice() %></td>
             </tr>
-            <tr>
-              <td class="gr1alt">2012-10-12 09:51:43</td>
-              <td class="gr1alt">Sell</td>
-              <td class="gr1alt">YHOO</td>
-              <td class="gr1alt">175</td>
-              <td class="gr1alt">$1,582.91</td>
-            </tr>
-            <tr>
-              <td class="gr1">2012-10-09 12:32:44</td>
-              <td class="gr1">Buy</td>
-              <td class="gr1">AAPL</td>
-              <td class="gr1">50</td>
-              <td class="gr1">$479.73</td>
-            </tr>
-            <tr>
-              <td class="gr1alt">2012-10-09 12:29:03</td>
-              <td class="gr1alt">Buy</td>
-              <td class="gr1alt">YHOO</td>
-              <td class="gr1alt">25</td>
-              <td class="gr1alt">$257.39</td>
-            </tr>
-            <tr>
-              <td class="gr1">2012-10-04 15:34:25</td>
-              <td class="gr1">Sell</td>
-              <td class="gr1">FB</td>
-              <td class="gr1">700</td>
-              <td class="gr1">$1,516.83</td>
-            </tr>
+<%      } %>
           </table>
         </div>
           
@@ -86,7 +84,7 @@
           <div align="center">
             <fieldset align="left">
               <legend>Show: </legend>
-                <input type="radio" value="numTransactions" checked="checked">
+                <input type="radio" name="filter" value="numTransactions" checked="checked">
                   <label>
                     <select>
                       <option value="1">5</option>
@@ -96,7 +94,7 @@
                       <option value="5">100</option>
                     </select> most recent transactions
                   </label><br>
-                <input type="radio" value="numDays">
+                <input type="radio" name="filter" value="numDays">
                   <label> past
                     <select>
                       <option value="1">week</option>
@@ -108,6 +106,17 @@
             </fieldset>    
           </div>      
         </p>
+        
+<%    }
+    } catch (SQLException e) { %>
+    <p>
+<%    
+      out.println("Could not retrieve the transaction history for this portfolio.");
+      out.println(e.getMessage());
+%>
+    </p>  
+<%  } %>
+        
         
       </div>
       
