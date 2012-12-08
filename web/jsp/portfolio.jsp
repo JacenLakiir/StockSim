@@ -78,22 +78,29 @@
         <tr>
           <th>Stock</th>
           <th>Number of Shares</th>
+          <th>% Change</th>
           <th>Current Value</th>
         </tr>
 <%    double totalMarketValue = 0;
-    for (int i = 0; i < stockHoldings.size(); i++) { %>
+    for (int i = 0; i < stockHoldings.size(); i++) {
+      Stock s = stockHoldings.get(i);
+%>
       <tr>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=stockHoldings.get(i).getTicker() %>
+          <%=s.getTicker() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=stockHoldings.get(i).getNumShares() %>
+          <%=s.getNumShares() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-<%      double marketValue = stockHoldings.get(i).getNumShares() * prices.get(i).doubleValue();
-      totalMarketValue += marketValue;
+ <%       double percentChange = (prices.get(i).doubleValue() - s.getAvgPriceBought().doubleValue()) / s.getAvgPriceBought().doubleValue();%>
+          <%=String.format("%.2f", percentChange*100) %>%
+        </td>
+        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+<%        double marketValue = s.getNumShares() * prices.get(i).doubleValue();
+          totalMarketValue += marketValue;
 %>
-      $<%=String.format("%.2f", marketValue) %>
+          $<%=String.format("%.2f", marketValue) %>
         </td>
       </tr>
 <%    } %>
@@ -123,10 +130,11 @@
     </p>  
 <%  } %>
         
+<%  String PID = (String) request.getParameter("pid");%>
         <nav>
           <ul>
             <li><a href="marketplace.html">Buy/Sell Stock</a></li>
-            <li><a href="history.html">Transaction History</a></li>
+            <li><a href="history.jsp?pid=<%=PID%>">Transaction History</a></li>
             <li><a href="performance.html">Performance</a></li>
           </ul>
         </nav>

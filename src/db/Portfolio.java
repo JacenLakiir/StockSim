@@ -121,5 +121,9 @@ public class Portfolio {
 		public int getNumShares() {
 			return num_shares;
 		}
+		
+		public BigDecimal getAvgPriceBought() {
+			return avg_price_bought;
+		}
 	}
 }
