@@ -1,0 +1,105 @@
+-- connect to database
+\c stocksim
+You are now connected to database "stocksim" as user "ubuntu".
+-- get password associated with some username for login authentification
+SELECT password
+FROM Users
+WHERE username='User50';
+ password 
+----------
+ password
+(1 row)
+
+-- get home page info after login
+SELECT portfolio_name
+FROM Portfolio
+WHERE username = 'User38';
+ portfolio_name 
+----------------
+ Portfolio 0
+ Portfolio 1
+(2 rows)
+
+-- retrieve info on some particular portfolio
+SELECT ticker, num_shares, avg_price_bought
+FROM Stock_Holdings
+WHERE PID='P7';
+ ticker | num_shares | avg_price_bought 
+--------+------------+------------------
+ GOOG   |          8 |           647.26
+ FB     |          3 |            22.17
+ AAPL   |          1 |           525.62
+ MSFT   |          9 |            26.66
+(4 rows)
+
+-- sort portfolio by some attribute
+SELECT ticker, num_shares, avg_price_bought
+FROM Stock_Holdings
+WHERE PID='P89'
+ORDER BY ticker DESC;
+ ticker | num_shares | avg_price_bought 
+--------+------------+------------------
+ YHOO   |         15 |            17.89
+ MSFT   |         13 |            26.66
+ GOOG   |         12 |           647.26
+ FB     |         18 |            22.17
+(4 rows)
+
+-- get top 10 portfolios in terms of cash
+-- will change to market value in real implementation
+-- right now market value doesn't make sense because price is dynamically obtained in realtime from Yahoo! Finance)
+SELECT PID, portfolio_name, cash 
+FROM Portfolio
+ORDER BY cash DESC
+Limit 10;
+ pid  | portfolio_name |  cash   
+------+----------------+---------
+ P84  | Portfolio 0    | 9585.72
+ P139 | Portfolio 2    | 9504.62
+ P71  | Portfolio 0    | 9452.84
+ P106 | Portfolio 0    | 9438.95
+ P111 | Portfolio 0    | 9234.65
+ P68  | Portfolio 0    | 9234.51
+ P99  | Portfolio 2    | 9225.74
+ P130 | Portfolio 2    | 8677.53
+ P92  | Portfolio 0    | 8356.57
+ P91  | Portfolio 2    | 8188.11
+(10 rows)
+
+-- computes the market value of a portfolio (defined as cash + total value of stocks)
+-- NOTE: assumes the price of all stocks to be 50; actual webpage will dynamically obtain the price in realtime from Yahoo! Finance
+SELECT portfolio.PID, cash+(SELECT SUM(values) FROM (SELECT 50*num_shares AS VALUES FROM stock_holdings WHERE PID='P60') AS mktvalue, portfolio WHERE portfolio.PID='P60') AS Mkt_Value FROM portfolio WHERE PID='P60';
+ pid | mkt_value 
+-----+-----------
+ P60 |   5336.43
+(1 row)
+
+-- computes the market value of all portfolios in the database and sorts them to display the top 10 Portfolios in terms of market value
+-- NOTE: again, 50 is used for the price of stocks.
+SELECT portfolio.PID, portfolio.cash + stock_value.values AS Mkt_Value FROM (SELECT PID, Sum(50*num_shares) AS values FROM stock_holdings Group By PID) AS stock_value, portfolio WHERE portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10;
+ pid  | mkt_value 
+------+-----------
+ P68  |  10934.51
+ P111 |  10884.65
+ P106 |  10838.95
+ P139 |  10754.62
+ P71  |  10702.84
+ P92  |  10606.57
+ P84  |  10585.72
+ P91  |   9938.11
+ P99  |   9775.74
+ P87  |   9767.61
+(10 rows)
+
+-- get transaction history for a particular portfolio
+SELECT ticker, num_shares, price, type, time 
+FROM TRANSACTION
+WHERE PID='P23';
+ ticker | num_shares | price  | type |            time            
+--------+------------+--------+------+----------------------------
+ YHOO   |         18 |  17.89 | Buy  | 2012-11-15 23:45:10.171066
+ FB     |          6 |  22.17 | Buy  | 2012-11-15 23:45:10.173159
+ AAPL   |          4 | 525.62 | Buy  | 2012-11-15 23:45:10.175346
+ MSFT   |          4 |  26.66 | Buy  | 2012-11-15 23:45:10.187882
+(4 rows)
+
