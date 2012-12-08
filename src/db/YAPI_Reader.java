@@ -86,42 +86,51 @@ public class YAPI_Reader {
 
 	public static void main(String args[]) {
 		try {
+			System.out.println("Getting prices...");
 			List<String> tickers = new ArrayList<String>();
 			tickers.add("GOOG");
 			tickers.add("YHOO");
 			tickers.add("AAPL");
 			List<BigDecimal> prices = getPrices(tickers);
-			for (int i = 0; i < prices.size(); i++)
+			for (int i = 0; i < prices.size(); i++) {
 				System.out.println(prices.get(i));
+			}
+			System.out.println();
 
+			System.out.println("Getting stock quotes with default attributes...");
 			List<String> quotes = getStockQuotes(tickers);
-			for (int i = 0; i < quotes.size(); i++)
+			for (int i = 0; i < quotes.size(); i++) {
 				System.out.println(quotes.get(i));
+			}
+			System.out.println();
 
 			List<String> attributes = new ArrayList<String>();
 			attributes.add("Name");
 			attributes.add("Ticker");
 			attributes.add("Bid");
 			attributes.add("Price");
+			System.out.println("Getting stock quotes with custom attributes...");
 			quotes = getStockQuotes(tickers, attributes);
-			for (int i = 0; i < quotes.size(); i++)
+			for (int i = 0; i < quotes.size(); i++) {
 				System.out.println(quotes.get(i));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public static List<BigDecimal> getPrices(List<String> tickers) throws Exception {
-		String url = "http://download.finance.yahoo.com/d/quotes.csv?s=";
+		StringBuilder url = new StringBuilder("http://download.finance.yahoo.com/d/quotes.csv?s=");
 		for (int i = 0; i < tickers.size() - 1; i++) {
-			url += (tickers.get(i) + ",");
+			url.append(tickers.get(i));
+			url.append(",");
 		}
-		url += tickers.get(tickers.size() - 1) + "&f=l1&e=.csv";
-		URL stock = new URL(url);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				stock.openStream()));
+		url.append(tickers.get(tickers.size() - 1));
+		url.append("&f=l1&e=.csv");
+		
+		URL stock = new URL(url.toString());
+		BufferedReader in = new BufferedReader(new InputStreamReader(stock.openStream()));
 		List<BigDecimal> prices = new ArrayList<BigDecimal>();
-
 		String inputLine;
 		while ((inputLine = in.readLine()) != null) {
 			prices.add(new BigDecimal(inputLine));
@@ -129,24 +138,30 @@ public class YAPI_Reader {
 
 		in.close();
 		return prices;
-
 	}
 
 	public static BigDecimal getPrice(String ticker) throws Exception {
-		String url = "http://download.finance.yahoo.com/d/quotes.csv?s=";
-		url += ticker + "&f=l1&e=.csv";
-		URL stock = new URL(url);
+		StringBuilder url = new StringBuilder("http://download.finance.yahoo.com/d/quotes.csv?s=");
+		url.append(ticker);
+		url.append("&f=l1&e=.csv");
+		
+		URL stock = new URL(url.toString());
 		BufferedReader in = new BufferedReader(new InputStreamReader(stock.openStream()));
 		return new BigDecimal(in.readLine());
 	}
 
 	public static List<String> getStockQuotes(List<String> tickers, String attributes) throws Exception {
-		String url = "http://download.finance.yahoo.com/d/quotes.csv?s=";
+		StringBuilder url = new StringBuilder("http://download.finance.yahoo.com/d/quotes.csv?s=");
 		for (int i = 0; i < tickers.size() - 1; i++) {
-			url += (tickers.get(i) + ",");
+			url.append(tickers.get(i));
+			url.append(",");
 		}
-		url += tickers.get(tickers.size() - 1) + "&f=" + attributes + "&e=.csv";
-		URL stock = new URL(url);
+		url.append(tickers.get(tickers.size() - 1));
+		url.append("&f=");
+		url.append(attributes);
+		url.append("&e=.csv");
+		
+		URL stock = new URL(url.toString());
 		BufferedReader in = new BufferedReader(new InputStreamReader(stock.openStream()));
 		List<String> quotes = new ArrayList<String>();
 		// String header =
@@ -157,7 +172,6 @@ public class YAPI_Reader {
 		while ((inputLine = in.readLine()) != null) {
 			quotes.add(inputLine);
 		}
-
 		in.close();
 		return quotes;
 	}
@@ -167,10 +181,10 @@ public class YAPI_Reader {
 	}
 
 	public static List<String> getStockQuotes(List<String> tickers, List<String> attributes) throws Exception {
-		String tags = "";
+		StringBuilder tags = new StringBuilder();
 		for (int i = 0; i < attributes.size(); i++) {
-			tags += tag.get(attributes.get(i));
+			tags.append(tag.get(attributes.get(i)));
 		}
-		return getStockQuotes(tickers, tags);
+		return getStockQuotes(tickers, tags.toString());
 	}
 }
