@@ -96,7 +96,7 @@
           <%=s.getNumShares() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=prices.get(i) %>
+          <%=String.format("%.2f", prices.get(i)) %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
           <%=s.getAvgPriceBought() %>
