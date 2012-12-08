@@ -37,6 +37,8 @@
     try {
         db.CreateUser(user);
         out.println("New user added to database.");
+        session.setAttribute("userID", username);
+        response.sendRedirect("home.jsp");
     } catch (SQLException e) {
         out.println("Could not add new user to database.");
         out.println(e.getMessage());
