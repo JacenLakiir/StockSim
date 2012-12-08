@@ -79,6 +79,8 @@
         <tr>
           <th>Stock</th>
           <th>Number of Shares</th>
+          <th>Current Price</th>
+          <th>Average Price Bought</th>
           <th>% Change</th>
           <th>Current Value</th>
         </tr>
@@ -92,6 +94,12 @@
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
           <%=s.getNumShares() %>
+        </td>
+        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+          <%=prices.get(i) %>
+        </td>
+        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+          <%=s.getAvgPriceBought() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
  <%       double percentChange = (prices.get(i).doubleValue() - s.getAvgPriceBought().doubleValue()) / s.getAvgPriceBought().doubleValue();%>
