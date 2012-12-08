@@ -61,17 +61,18 @@
       String PID = (String) request.getParameter("pid");
       Portfolio portfolio = db.getStock_Holdings(PID);
       List<Stock> stockHoldings = portfolio.getStockHoldings();
-      if (stockHoldings == null) {
+      if (stockHoldings == null || stockHoldings.size() == 0) {
 %>
         <p>
 <%        out.println("Empty portfolio - no stocks held."); %>
       </p>
 <%    }
-      List<String> tickers = new ArrayList<String>();
-      for (int i = 0; i < stockHoldings.size(); i++) {
-        tickers.add(stockHoldings.get(i).getTicker());
-      }
-      List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
+      else {
+        List<String> tickers = new ArrayList<String>();
+        for (int i = 0; i < stockHoldings.size(); i++) {
+          tickers.add(stockHoldings.get(i).getTicker());
+        }
+        List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
 %>
     <div class="table">
       <table>
@@ -121,7 +122,8 @@
         Cash Remaining: $<%=portfolio.getCash()%><br>
         Total Market Value: $<%=String.format("%.2f", totalMarketValue + portfolio.getCash().doubleValue()) %>
       </p>
-<%  } catch (SQLException e) { %>
+<%    }
+  } catch (SQLException e) { %>
     <p>
 <%    
     out.println("Could not retrieve the stock holdings for this portfolio.");
