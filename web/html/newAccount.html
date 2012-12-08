@@ -33,8 +33,8 @@
             <fieldset>
               <form name="createAccount" method="post" action="../jsp/create-account.jsp">
                 <label>Email:        </label><input type="email" name="email" required="required"><br>
-                <label>Username: </label><input type="text" name="username" required="required"><br>
-                <label>Password:  </label><input type="password" name="password" required="required"><br><br>
+                <label>Username: </label><input type="text" name="username" pattern=".{4,}" required="required"><br>
+                <label>Password:  </label><input type="password" name="password" pattern=".{5,}" required="required"><br><br>
                 <input type="submit" value="Create Account">
               </form>
             </fieldset>
