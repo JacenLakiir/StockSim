@@ -37,6 +37,11 @@ CREATE TABLE Stock_Holdings(
   PRIMARY KEY(PID, Ticker)
 );
 
+CREATE TABLE Stock_Prices(
+  ticker VARCHAR(10) NOT NULL,
+  price NUMERIC(1000,2) NOT NULL
+);
+
 CREATE TABLE Transaction(
   PID VARCHAR(30) REFERENCES Portfolio(PID),
   ticker VARCHAR(10) NOT NULL,
@@ -73,11 +78,15 @@ CREATE FUNCTION exec_Transaction() RETURNS trigger AS $exec_Transaction$
         UPDATE Stock_Holdings SET avg_price_bought=(new.num_shares*new.price+current_num_shares*current_avg_price)/(new.num_shares+current_num_shares)
           WHERE PID=new.PID AND ticker=new.ticker;
       END IF;
-        END IF;
+    END IF;
   
+    IF NOT EXISTS (SELECT * FROM Stock_Prices WHERE ticker=new.ticker) THEN
+      INSERT INTO Stock_Prices VALUES (new.ticker, new.price);
+    END IF;
+
     DELETE FROM Stock_Holdings WHERE num_shares=0;
 
-      RETURN NEW;
+    RETURN NEW;
     END;
 $exec_Transaction$ LANGUAGE plpgsql;
 
