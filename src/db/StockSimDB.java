@@ -26,7 +26,8 @@ public class StockSimDB {
 		CREATE_NEW_PORTFOLIO("INSERT INTO Portfolio VALUES(?, ?, ?, ?, ?);"),
 		AUTH_LOGIN("SELECT username FROM Users WHERE username=? AND password=?"),
 		PERFORM_TRANSACTION("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())"),
-		GET_TRANSACTION_HISTORY("SELECT * FROM Transaction WHERE PID=? AND time>? ORDER BY time DESC"),
+		GET_TRANSACTION_HISTORY_BY_TIME("SELECT * FROM Transaction WHERE PID=? AND time>? ORDER BY time DESC"),
+		GET_TRANSACTION_HISTORY_BY_NUMBER("SELECT * FROM Transaction WHERE PID=? ORDER BY time DESC LIMIT ?"),
 		GET_STOCK_HOLDINGS("SELECT ticker, num_shares, avg_price_bought FROM Stock_Holdings WHERE PID=?"),
 		GET_PORTFOLIO_NAMES("SELECT portfolio_name FROM Portfolio WHERE username=?"),
 		GET_PORTFOLIO_INFO("SELECT portfolio_name, time_created, cash FROM Portfolio WHERE PID=?"),
@@ -180,38 +181,24 @@ public class StockSimDB {
          }
     }
     
-    public ArrayList<Transaction> getTransactionHistory(String PID, Timestamp time) throws SQLException{
+    public List<Transaction> getTransactionHistoryByNumber(String PID, int numTransactions) throws SQLException{
     	 PreparedStatement ps = null;
     	 ResultSet rs = null;
-        
          try {
         	 
-        	 ps = _preparedStatements.get(PreparedStatementID.GET_TRANSACTION_HISTORY);
+        	 ps = _preparedStatements.get(PreparedStatementID.GET_TRANSACTION_HISTORY_BY_NUMBER);
              ps.setString(1, PID);
-             ps.setTimestamp(2, time);
+             ps.setInt(2, numTransactions);
              rs = ps.executeQuery();
-             ArrayList<Transaction> Transactions = new ArrayList<Transaction>();
+             List<Transaction> transactions = new ArrayList<Transaction>();
              while (rs.next()) {
             	 Transaction t = new Transaction(rs.getString(1), rs.getString(2), rs.getInt(3), rs.getBigDecimal(4), rs.getString(5), rs.getTimestamp(6));
-                 Transactions.add(t);
+            	 transactions.add(t);
              }
-             return Transactions;
+             return transactions;
          } catch (SQLException e) {
-             // Here, we could wrap e inside another custom-defined
-             // exception that provides the catcher with more
-             // information about the context of e (e.g., it happened
-             // while listing all drinkers).  However, I got lazy here
-             // by just re-throwing e, which actually makes this catch
-             // block useless.
              throw e;
          } finally {
-             // To conserve JDBC resources, be nice and call close().
-             // Although JDBC is supposed to call close() when these
-             // things get garbage-collected, the problem is that if
-             // you ever use connection pooling, if close() is not called
-             // explicitly, these resources won't be available for
-             // reuse, which can cause the connection pool to run out
-             // of its allocated resources.
 //	             if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 //	             if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
          }
