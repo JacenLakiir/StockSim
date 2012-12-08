@@ -33,19 +33,21 @@ public class ProductionDatasetGenerator {
 	public static void main(String args[]) {
 		ProductionDatasetGenerator pdg = new ProductionDatasetGenerator();
 		try {
+			System.out.println("Generating Users...");
 			pdg.makeUsers(NUM_USERS);
 		} catch (IOException e1) {
-			System.out.println("Failed to make Users");
+			System.err.println("Failed to generate Users");
 			e1.printStackTrace();
 		}
 		try {
+			System.out.println("Generating Portfolios...");
 			pdg.makePortfolios(MAX_PORTFOLIOS);
 		} catch (Exception e) {
-			System.out.println("Failed to make Portfolios");
+			System.err.println("Failed to generate Portfolios");
 			e.printStackTrace();
 		}
 		pdg.close();
-		System.out.println("Done");
+		System.out.println("Done!");
 	}
 
 	public ProductionDatasetGenerator() {
@@ -91,8 +93,7 @@ public class ProductionDatasetGenerator {
 		}
 	}
 
-	public void makeTransactions(String PID, Random seed)
-			throws Exception {
+	public void makeTransactions(String PID, Random seed) throws Exception {
 		for (int i = 0; i < SAMPLE_TICKERS.size(); i++) {
 			String ticker = SAMPLE_TICKERS.get(i);
 			int numShares = seed.nextInt(20);
