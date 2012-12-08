@@ -3,6 +3,7 @@ package db;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
+
 import javax.sql.*;
 
 import javax.naming.*;
@@ -31,7 +32,12 @@ public class StockSimDB {
 		GET_PORTFOLIO_INFO("SELECT portfolio_name, time_created, cash FROM Portfolio WHERE PID=?"),
 		GET_PID("SELECT PID FROM Portfolio WHERE username=? AND portfolio_name=?"),
 		GET_ALL_PORTFOLIOS("SELECT PID, portfolio_name, username, time_created, cash FROM Portfolio WHERE username=?"),
-		GET_PORTFOLIO_NAME_BY_PID("SELECT portfolio_name FROM Portfolio WHERE PID=?");
+		GET_PORTFOLIO_NAME_BY_PID("SELECT portfolio_name FROM Portfolio WHERE PID=?"),
+		getStockTickers("SELECT DISTINCT ticker FROM Stock_Prices"),
+		updatePrices("UPDATE Stock_Prices SET price=? where ticker=?"),
+		getLeaderBoard("Select portfolio.PID, portfolio.username, portfolio.portfolio_name, portfolio.cash + stock_value.values as Mkt_Value " +
+			"from (select PID, Sum(Stock_Prices.price*num_shares) as values from stock_holdings, Stock_Prices where stock_holdings.ticker=Stock_Prices.ticker " +
+			"Group By PID) as stock_value, portfolio where portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10");
 		
         public final String sql;
         
@@ -348,5 +354,51 @@ public class StockSimDB {
 		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 		 }	    	
+    }
+    public List<LeaderBoard> getLeaderBoards() throws Exception{
+    	PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<String> tickers = new ArrayList<String>();
+		List<LeaderBoard> leaders = new ArrayList<LeaderBoard>();
+		try {
+			ps = _preparedStatements.get(PreparedStatementID.getStockTickers);
+		    rs = ps.executeQuery();
+		    while (rs.next()) {
+		    	tickers.add(rs.getString(1));
+		    }
+		    ps = null;
+		    rs = null;
+		    List<String> prices = YAPI_Reader.getStockQuotes(tickers);
+		    for(int i=0;i<tickers.size();i++){
+		    	ps = _preparedStatements.get(PreparedStatementID.updatePrices);
+			    ps.setString(1, prices.get(i));
+			    ps.setString(2, tickers.get(i));
+			    rs = ps.executeQuery();
+		    }
+		    ps = null;
+		    rs = null;
+		    
+		    ps = _preparedStatements.get(PreparedStatementID.getLeaderBoard);
+		    rs = ps.executeQuery();
+		    while(rs.next()){
+		    	LeaderBoard lb = new LeaderBoard(rs.getString(2), rs.getString(3), rs.getBigDecimal(4));
+		    	leaders.add(lb);
+		    }
+		    return leaders;
+		    
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			// To conserve JDBC resources, be nice and call close().
+			// Although JDBC is supposed to call close() when these
+			// things get garbage-collected, the problem is that if
+			// you ever use connection pooling, if close() is not called
+			// explicitly, these resources won't be available for
+			// reuse, which can cause the connection pool to run out
+			// of its allocated resources.
+		    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+		    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+    	
+    }
     }
 }
