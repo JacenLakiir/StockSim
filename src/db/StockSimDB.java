@@ -39,7 +39,13 @@ public class StockSimDB {
 		getLeaderBoard("Select portfolio.PID, portfolio.username, portfolio.portfolio_name, portfolio.cash + stock_value.values as Mkt_Value " +
 			"from (select PID, Sum(Stock_Prices.price*num_shares) as values from stock_holdings, Stock_Prices where stock_holdings.ticker=Stock_Prices.ticker " +
 			"Group By PID) as stock_value, portfolio where portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10"),
-		AuthenticatePID("SELECT EXISTS (SELECT PID FROM Portfolio WHERE username=? and PID=?)");
+		AuthenticatePID("SELECT EXISTS (SELECT PID FROM Portfolio WHERE username=? and PID=?)"),
+		getRank("SELECT COUNT(portfolio.PID)+1 AS Rank FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS values FROM stock_holdings, " +
+				"Stock_Prices WHERE stock_holdings.ticker=Stock_Prices.ticker GROUP BY PID) AS stock_value, portfolio WHERE portfolio.PID = " +
+				"stock_value.PID AND (portfolio.cash+stock_value.values)> (SELECT cash+SUM(Mkt_Value.values) FROM (SELECT PID, " +
+				"Stock_Prices.Price*num_shares as values from stock_holdings, Stock_Prices WHERE PID=? AND stock_holdings.ticker=" +
+				"Stock_Prices.ticker) AS Mkt_Value, portfolio WHERE portfolio.PID=Mkt_Value.PID GROUP BY portfolio.PID)"),
+		getTotalPortfolioNum("SELECT COUNT(PID) FROM Portfolio"); 
 		
         public final String sql;
         
@@ -344,38 +350,12 @@ public class StockSimDB {
 		 }	    	
     }
     public List<LeaderBoard> getLeaderBoards() throws Exception{
+    	updateStockPrices();
     	PreparedStatement ps = null;
 		ResultSet rs = null;
-		List<String> tickers = new ArrayList<String>();
 		List<LeaderBoard> leaders = new ArrayList<LeaderBoard>();
 		try {
-			ps = _preparedStatements.get(PreparedStatementID.getStockTickers);
-		    rs = ps.executeQuery();
-		    while (rs.next()) {
-		    	tickers.add(rs.getString(1));
-		    }
-		    
-		    boolean oldAutoCommitState = con.getAutoCommit();
-	    	con.setAutoCommit(false);
-		    try {
-			    ps = null;
-			    rs = null;
-			    List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
-			    for (int i = 0; i < tickers.size(); i++){
-			    	ps = _preparedStatements.get(PreparedStatementID.updatePrices);
-				    ps.setBigDecimal(1, prices.get(i));
-				    ps.setString(2, tickers.get(i));
-				    ps.executeUpdate();
-			    }
-			    con.commit();
-		    } catch (SQLException e) {
-		    	con.rollback();
-		    }
-		    con.setAutoCommit(oldAutoCommitState);
-	
-		    ps = null;
-		    rs = null;
-		    ps = _preparedStatements.get(PreparedStatementID.getLeaderBoard);
+			ps = _preparedStatements.get(PreparedStatementID.getLeaderBoard);
 		    rs = ps.executeQuery();
 		    while (rs.next()){
 		    	LeaderBoard lb = new LeaderBoard(rs.getString(2), rs.getString(3), rs.getBigDecimal(4));
@@ -389,6 +369,76 @@ public class StockSimDB {
 //		    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 //		    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 		}
+    }
+    
+    public void updateStockPrices() throws Exception{
+    	PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<String> tickers = new ArrayList<String>();
+        boolean oldAutoCommitState = con.getAutoCommit();
+        con.setAutoCommit(false);
+        //Gets List of Stock Tickers
+        try {
+			ps = _preparedStatements.get(PreparedStatementID.getStockTickers);
+		    rs = ps.executeQuery();
+		    while (rs.next()) {
+		    	tickers.add(rs.getString(1));
+		    }
+        }catch (SQLException e) {
+			throw e;
+		}finally {
+//		    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+//		    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+		}
+        
+        //Updates Prices for the List of Stock Tickers
+		try {
+		  	ps = null;
+		   	rs = null;
+		   	List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
+		   	for (int i = 0; i < tickers.size(); i++){
+		   		ps = _preparedStatements.get(PreparedStatementID.updatePrices);
+		   		ps.setBigDecimal(1, prices.get(i));
+		   		ps.setString(2, tickers.get(i));
+		   		ps.executeUpdate();
+		   	}
+            con.commit();
+		} catch (SQLException e) {
+		   	con.rollback();
+		}
+        finally {
+            try {con.setAutoCommit(oldAutoCommitState); } catch (SQLException ignore) {}
+        }
+    }
+    
+    public List<Integer> getRanking(String PID) throws Exception{
+    	
+    	List<Integer> rank = new ArrayList<Integer>();
+    	updateStockPrices();
+    	
+    	PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = _preparedStatements.get(PreparedStatementID.getRank);
+		    ps.setString(1, PID);
+		    rs = ps.executeQuery();
+		    rs.next();
+		    rank.add(rs.getInt(1));
+		    
+		    ps = null;
+		    rs = null;
+		    ps = _preparedStatements.get(PreparedStatementID.getTotalPortfolioNum);
+		    rs = ps.executeQuery();
+		    rs.next();
+		    rank.add(rs.getInt(1));
+		    
+		    return rank;
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+		 }	    
     }
     
     public boolean AuthenticatePID(String PID, String Username) throws SQLException{
