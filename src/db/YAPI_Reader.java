@@ -11,6 +11,7 @@ import java.util.List;
 public class YAPI_Reader {
 
 	private static HashMap<String, String> tag;
+	public static final List<String> DEFAULT_ATTRIBUTES;
 
 	static {
 		tag = new HashMap<String, String>();
@@ -80,9 +81,18 @@ public class YAPI_Reader {
 		tag.put("Year High", "k0");
 		tag.put("Year Low", "j0");
 		tag.put("Year Range", "w0");
+		DEFAULT_ATTRIBUTES = new ArrayList<String>();
+		DEFAULT_ATTRIBUTES.add("Ticker");
+		DEFAULT_ATTRIBUTES.add("Name");
+		DEFAULT_ATTRIBUTES.add("Last Trade Price Only");
+		DEFAULT_ATTRIBUTES.add("Change In Percent");
+		DEFAULT_ATTRIBUTES.add("PE Ratio");
+		DEFAULT_ATTRIBUTES.add("Market Capitalization");
+		DEFAULT_ATTRIBUTES.add("Diluted EPS");
+		DEFAULT_ATTRIBUTES.add("PEG Ratio");
+		DEFAULT_ATTRIBUTES.add("Revenue");		
 	}
 
-	public static final String DEFAULT_ATTRIBUTES = "s0n0l1p2r0j1e0r5s6";
 
 	public static void main(String args[]) {
 		try {
@@ -150,24 +160,31 @@ public class YAPI_Reader {
 		return new BigDecimal(in.readLine());
 	}
 
-	public static List<String> getStockQuotes(List<String> tickers, String attributes) throws Exception {
+	public static List<String> getStockQuotes(List<String> tickers, List<String> attributes) throws Exception {
 		StringBuilder url = new StringBuilder("http://download.finance.yahoo.com/d/quotes.csv?s=");
 		for (int i = 0; i < tickers.size() - 1; i++) {
 			url.append(tickers.get(i));
 			url.append(",");
 		}
 		url.append(tickers.get(tickers.size() - 1));
+		
+		StringBuilder header = new StringBuilder();
+		StringBuilder tags = new StringBuilder();
+		for (int i = 0; i < attributes.size(); i++) {
+			tags.append(tag.get(attributes.get(i)));
+			header.append(attributes.get(i) + ",");
+		}
+		
 		url.append("&f=");
-		url.append(attributes);
+		url.append(tags.toString());
 		url.append("&e=.csv");
 		
 		URL stock = new URL(url.toString());
 		BufferedReader in = new BufferedReader(new InputStreamReader(stock.openStream()));
 		List<String> quotes = new ArrayList<String>();
-		// String header =
-		// "Ticker,Name,Price,% Change,P/E,Market Cap,Diluted EPS,PEG Ratio,Revenue";
-		// quotes.add(header);
+		quotes.add(header.substring(0, header.length()-1));
 
+	
 		String inputLine;
 		while ((inputLine = in.readLine()) != null) {
 			quotes.add(inputLine);
@@ -180,11 +197,4 @@ public class YAPI_Reader {
 		return getStockQuotes(tickers, DEFAULT_ATTRIBUTES);
 	}
 
-	public static List<String> getStockQuotes(List<String> tickers, List<String> attributes) throws Exception {
-		StringBuilder tags = new StringBuilder();
-		for (int i = 0; i < attributes.size(); i++) {
-			tags.append(tag.get(attributes.get(i)));
-		}
-		return getStockQuotes(tickers, tags.toString());
-	}
 }
