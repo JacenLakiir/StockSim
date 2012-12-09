@@ -80,11 +80,13 @@ CREATE FUNCTION exec_Transaction() RETURNS trigger AS $exec_Transaction$
       END IF;
     END IF;
   
+    DELETE FROM Stock_Holdings WHERE num_shares=0;
+  
     IF NOT EXISTS (SELECT * FROM Stock_Prices WHERE ticker=new.ticker) THEN
       INSERT INTO Stock_Prices VALUES (new.ticker, new.price);
     END IF;
-
-    DELETE FROM Stock_Holdings WHERE num_shares=0;
+    
+    DELETE FROM Stock_Prices WHERE ticker NOT IN (SELECT ticker FROM Stock_Holdings);
 
     RETURN NEW;
     END;
