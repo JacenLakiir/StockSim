@@ -45,6 +45,7 @@
        
        String[] attrs = request.getParameterValues("attributes");
        List<String> attributes = new ArrayList<String>();
+       attributes.add("Ticker");
        if (attrs != null) {
          for (String a: attrs) {
            attributes.add(a);
@@ -52,7 +53,7 @@
        }
        
        List<String> quotes;
-       if (attributes.size() > 0) {
+       if (attributes.size() > 1) {
          quotes = YAPI_Reader.getStockQuotes(tickers, attributes);
        }
        else {
