@@ -25,7 +25,7 @@
   </header>
 
   <div class="content">
-<%@ page import="java.sql.SQLException, java.util.List, java.util.ArrayList, db.YAPI_Reader" %>
+<%@ page import="java.sql.SQLException, java.util.Collections, java.util.Arrays, java.util.List, java.util.ArrayList, db.YAPI_Reader" %>
 
 <%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
@@ -39,22 +39,15 @@
     try {
        String stocks = request.getParameter("stocks");
        List<String> tickers = new ArrayList<String>();
-       for (String s : stocks.split("\\s+")) {
-         tickers.add(s);
-       }
+       Collections.addAll(tickers, stocks.split("\\s+"));
        
        String[] attrs = request.getParameterValues("attributes");
-       List<String> attributes = new ArrayList<String>();
-       attributes.add("Ticker");
-       if (attrs != null) {
-         for (String a: attrs) {
-           attributes.add(a);
-         }
-       }
-       
        List<String> quotes;
-       if (attributes.size() > 1) {
-         quotes = YAPI_Reader.getStockQuotes(tickers, attributes);
+       if (attrs != null) {
+         List<String> attributes = new ArrayList<String>();
+         attributes.add("Ticker");
+    	   Collections.addAll(attributes, attrs);
+    	   quotes = YAPI_Reader.getStockQuotes(tickers, attributes);
        }
        else {
          quotes = YAPI_Reader.getStockQuotes(tickers);
