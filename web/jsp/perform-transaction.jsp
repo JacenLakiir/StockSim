@@ -31,9 +31,9 @@
 <p align="center">
 <%
     try {
-    	  if (type.equals("Sell")) {
-    		  numShares *= -1;
-    		}
+        if (type.equals("Sell")) {
+          numShares *= -1;
+        }
         BigDecimal price = db.performTransaction(PID, type, numShares, ticker);
         
         boolean isPlural = (Math.abs(numShares) > 1);
@@ -71,6 +71,11 @@
         message.append(" shares of ");
         message.append(ticker);
         message.append(".");
+      }
+      else if (error.contains("INVALID TICKER")) {
+        message.append("The ticker ");
+        message.append(ticker);
+        message.append(" is invalid. This stock does not exist.");
       }
       
       out.println(message.toString());

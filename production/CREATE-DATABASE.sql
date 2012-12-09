@@ -59,6 +59,10 @@ CREATE FUNCTION exec_Transaction() RETURNS trigger AS $exec_Transaction$
     current_avg_price NUMERIC(1000,2);
 
   BEGIN
+    IF new.price<=0 THEN
+      RAISE EXCEPTION 'INVALID TICKER';
+    END IF;
+  
     IF NOT EXISTS (SELECT ticker FROM Stock_Holdings WHERE PID=new.PID AND ticker=new.ticker) THEN
       INSERT INTO Stock_Holdings VALUES(new.PID, new.ticker, 0, 0);
     END IF;
