@@ -27,9 +27,9 @@
       <div class="content">
         <nav>
           <ul>
-            <li><a href="../jsp/home.jsp">Home</a></li>
+            <li><a href="home.jsp">Home</a></li>
             <li><a href="research.html">Research</a></li>
-            <li><a href="leaderboards.html">Leaderboards</a></li>
+            <li><a href="leaderboards.jsp">Leaderboards</a></li>
           </ul>
         </nav>
         

@@ -146,7 +146,7 @@
 <%  String PID = (String) request.getParameter("pid");%>
         <nav>
           <ul>
-            <li><a href="marketplace.html">Buy/Sell Stock</a></li>
+            <li><a href="marketplace.jsp?pid=<%=PID%>">Buy/Sell Stock</a></li>
             <li><a href="history.jsp?pid=<%=PID%>">Transaction History</a></li>
             <li><a href="performance.html">Performance</a></li>
           </ul>
