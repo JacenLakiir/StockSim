@@ -43,17 +43,17 @@
          tickers.add(s);
        }
        
-       String attrs = request.getParameter("attributes");
+       String[] attrs = request.getParameterValues("attributes");
        List<String> attributes = new ArrayList<String>();
        if (attrs != null) {
-         for (String a: attrs.split("\\s+")) {
+         for (String a: attrs) {
            attributes.add(a);
          }
        }
        
        List<String> quotes;
        if (attributes.size() > 0) {
-           quotes = YAPI_Reader.getStockQuotes(tickers, attributes);
+         quotes = YAPI_Reader.getStockQuotes(tickers, attributes);
        }
        else {
          quotes = YAPI_Reader.getStockQuotes(tickers);
@@ -63,28 +63,28 @@
       <table>
         <tr>
 <%        String[] header = quotes.get(0).split(",");
-      for (int j = 0; j < header.length; j++) {
+          for (int j = 0; j < header.length; j++) {
 %>
-        <th><%=header[j] %></th>        
-<%      } %>
-    </tr>
-<%    for (int i = 1; i < quotes.size(); i++) {
-      String row[] = quotes.get(i).split(",");
+            <th><%=header[j] %></th>        
+<%        } %>
+        </tr>
+<%      for (int i = 1; i < quotes.size(); i++) {
+          String row[] = quotes.get(i).split(",");
 %>
-    <tr>
-<%      for (int j = 0; j < row.length; j++) { %>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-      <%=row[j] %>
-      </td>
-<%      } %>
-    </tr>
-<%    } %>
+        <tr>
+<%        for (int j = 0; j < row.length; j++) { %>
+            <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+              <%=row[j] %>
+            </td>
+<%        } %>
+        </tr>
+<%     } %>
     </table>
   </div>
-<%    } catch (Exception e) { %>
+<%  } catch (Exception e) { %>
 <p align="center">
 <%
-    out.println("Stock data could not be retrieved at this time. Please try again later.");
+      out.println("Stock data could not be retrieved at this time. Please try again later.");
       e.printStackTrace();
     }
 %>
