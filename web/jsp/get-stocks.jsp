@@ -74,7 +74,7 @@
         <tr>
 <%        for (int j = 0; j < row.length; j++) { %>
             <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-              <%=row[j] %>
+              <%=row[j].replaceAll("\"", "") %>
             </td>
 <%        } %>
         </tr>
@@ -89,6 +89,10 @@
     }
 %>
 </p>
+
+    <p align="center">
+      <a href="../html/research.html">Continue research.</a>
+    </p>
   </div>
   
   <footer>
