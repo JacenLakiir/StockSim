@@ -33,7 +33,7 @@
           </ul>
         </nav>
 
-<%@ page import="java.sql.SQLException, java.util.List, java.util.ArrayList, java.math.BigDecimal, db.Portfolio, db.Portfolio.Stock, db.YAPI_Reader" %>
+<%@ page import="java.sql.SQLException, java.util.List, java.util.ArrayList, java.util.Collections, java.math.BigDecimal, db.Portfolio, db.Stock, db.Stock.TickerComparator, db.Stock.NumSharesComparator, db.YAPI_Reader" %>
 
 <%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
@@ -68,6 +68,20 @@
       </p>
 <%    }
       else {
+        String sortStyle = (String) request.getParameter("sort");
+        if (sortStyle != null) {
+          if (sortStyle.equals("ticker")) {
+            Collections.sort(stockHoldings, new TickerComparator());
+          }
+          else if (sortStyle.equals("numShares")) {
+            Collections.sort(stockHoldings, new NumSharesComparator());
+            Collections.reverse(stockHoldings);
+          }
+        }
+        else {
+          Collections.sort(stockHoldings, new TickerComparator());
+        }
+        
         List<String> tickers = new ArrayList<String>();
         for (int i = 0; i < stockHoldings.size(); i++) {
           tickers.add(stockHoldings.get(i).getTicker());
@@ -87,6 +101,7 @@
 <%    double totalMarketValue = 0;
     for (int i = 0; i < stockHoldings.size(); i++) {
       Stock s = stockHoldings.get(i);
+      BigDecimal price = prices.get(i);
 %>
       <tr>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
@@ -96,20 +111,20 @@
           <%=s.getNumShares() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          $<%=String.format("%.2f", prices.get(i)) %>
+          $<%=String.format("%.2f", price) %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
           $<%=s.getAvgPriceBought() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-<%        double roundedPrice = Double.parseDouble(String.format("%.2f", prices.get(i)));
+<%        double roundedPrice = Double.parseDouble(String.format("%.2f", price));
           double avgPriceBought = s.getAvgPriceBought().doubleValue();
-      double percentChange = (roundedPrice - avgPriceBought) / avgPriceBought;
+          double percentChange = (roundedPrice - avgPriceBought) / avgPriceBought;
 %>
           <%=String.format("%.2f", percentChange*100) %>%
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-<%        double marketValue = s.getNumShares() * prices.get(i).doubleValue();
+<%        double marketValue = s.getNumShares() * price.doubleValue();
           totalMarketValue += marketValue;
 %>
           $<%=String.format("%.2f", marketValue) %>
@@ -119,14 +134,18 @@
       </table>
     </div>
     
-      <%--TODO: figure how to toggle sorts --%>        
       <p align="center">
-        <label>Sort portfolio by: </label>
-          <select id="sorts">
-            <option value="1">stock symbol</option>
-            <option value="2">num. shares</option>
-            <option value="3">current value</option>
-          </select>
+        <form name="portfolio" action="portfolio.jsp?" method="get">
+          <input type="hidden" name="pid" value="<%=PID %>">
+          <p align="center">
+            <label>Sort portfolio by: </label>
+            <select name="sort">
+              <option value="ticker">ticker</option>
+              <option value="numShares">num. shares</option>
+            </select>
+            <input type="submit" value="Sort">
+          </p>
+        </form>
       </p>
         
       <p align="center">

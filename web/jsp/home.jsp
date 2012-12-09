@@ -35,7 +35,7 @@
         
         <h3 align="center">Home</h3>
         
-<%@ page import="java.sql.SQLException, java.util.Collections, java.util.List, java.util.ArrayList, java.math.BigDecimal, db.Portfolio, db.Portfolio.Stock, db.Portfolio.NameComparator, db.YAPI_Reader" %>
+<%@ page import="java.sql.SQLException, java.util.Collections, java.util.List, java.util.ArrayList, java.math.BigDecimal, db.Portfolio, db.Stock, db.Portfolio.NameComparator, db.YAPI_Reader" %>
 
 <%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
@@ -113,8 +113,8 @@
 <%  } %>
         <p>
           <div align="center">
-            <form>
-              <input type="button" onClick="parent.location='../html/newPortfolio.html'" value="Create New Portfolio">
+            <form name="newPortfolio" action="../html/newPortfolio.html">
+              <input type="submit" value="Create New Portfolio">
             </form>
           </div>
         </p>

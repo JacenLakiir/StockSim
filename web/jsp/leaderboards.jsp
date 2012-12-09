@@ -89,20 +89,7 @@
 %>
     </p>  
 <%  } %>
-       
-       <%--TODO: figure out how to toggle leaderboard type --%>
-        <p>
-          <div align="center">
-            <fieldset align="left">
-              <legend>Filter leaderboards by: </legend>
-              <input type="radio" name="filter" value="all" checked="checked">
-              <label>All portfolios across all users</label>
-              <input type="radio" name="filter" value="best">
-              <label>Best portfolio of each user</label>
-            </fieldset>
-          </div>
-        </p>
-      </div>
+</div>
       
       <footer>
         <p>

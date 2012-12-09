@@ -116,8 +116,17 @@
 %>
     </p>  
 <%  } %>
-        
-        
+
+<%  try {
+      String PID = (String) request.getParameter("pid");
+%>
+      <p align="center">
+        <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
+      </p>
+<%  } catch (Exception e) {
+	      out.println(e);
+    }
+%>  
       </div>
       
       <footer>
