@@ -38,7 +38,8 @@ public class StockSimDB {
 		updatePrices("UPDATE Stock_Prices SET price=? WHERE ticker=?"),
 		getLeaderBoard("Select portfolio.PID, portfolio.username, portfolio.portfolio_name, portfolio.cash + stock_value.values as Mkt_Value " +
 			"from (select PID, Sum(Stock_Prices.price*num_shares) as values from stock_holdings, Stock_Prices where stock_holdings.ticker=Stock_Prices.ticker " +
-			"Group By PID) as stock_value, portfolio where portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10");
+			"Group By PID) as stock_value, portfolio where portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10"),
+		AuthenticatePID("SELECT EXISTS (SELECT PID FROM Portfolio WHERE username=? and PID=?)");
 		
         public final String sql;
         
@@ -389,4 +390,25 @@ public class StockSimDB {
 //		    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 		}
     }
+    
+    public boolean AuthenticatePID(String PID, String Username) throws SQLException{
+    	PreparedStatement ps = null;
+		ResultSet rs = null;
+		boolean answer = false;
+		try {
+			ps = _preparedStatements.get(PreparedStatementID.AuthenticatePID);
+			ps.setString(1, Username);
+			ps.setString(2, PID);
+		    rs = ps.executeQuery();
+		    rs.next();
+		    answer = rs.getBoolean(1);
+		    return answer;
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+		 }	    	
+    }
+    
 }
