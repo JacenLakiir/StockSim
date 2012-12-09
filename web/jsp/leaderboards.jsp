@@ -60,22 +60,21 @@
           <th>Portfolio</th>
           <th>Market Value</th>
         </tr>
-<%    for (int i = 0; i < topPortfolios.size(); i++) { 
-    LeaderBoard lb = topPortfolios.get(i);
+<%  for (int i = 0; i < topPortfolios.size(); i++) { 
+      LeaderBoard lb = topPortfolios.get(i);
 %>
       <tr>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%--TODO: output rank (ties are possible) --%>
           <%=i+1 %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          lb.getUsername();
+          <%=lb.getUsername() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          lb.getPortfolioName();
+          <%=lb.getPortfolioName() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          $<%=lb.getMktValue() %>
+          $<%=lb.getMarketValue() %>
         </td>
       </tr>
 <%    } %>

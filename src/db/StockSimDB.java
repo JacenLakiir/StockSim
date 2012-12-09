@@ -35,7 +35,7 @@ public class StockSimDB {
 		GET_ALL_PORTFOLIOS("SELECT PID, portfolio_name, username, time_created, cash FROM Portfolio WHERE username=?"),
 		GET_PORTFOLIO_NAME_BY_PID("SELECT portfolio_name FROM Portfolio WHERE PID=?"),
 		getStockTickers("SELECT DISTINCT ticker FROM Stock_Prices"),
-		updatePrices("UPDATE Stock_Prices SET price=? where ticker=?"),
+		updatePrices("UPDATE Stock_Prices SET price=? WHERE ticker=?"),
 		getLeaderBoard("Select portfolio.PID, portfolio.username, portfolio.portfolio_name, portfolio.cash + stock_value.values as Mkt_Value " +
 			"from (select PID, Sum(Stock_Prices.price*num_shares) as values from stock_holdings, Stock_Prices where stock_holdings.ticker=Stock_Prices.ticker " +
 			"Group By PID) as stock_value, portfolio where portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10");
@@ -353,21 +353,30 @@ public class StockSimDB {
 		    while (rs.next()) {
 		    	tickers.add(rs.getString(1));
 		    }
-		    ps = null;
-		    rs = null;
-		    List<String> prices = YAPI_Reader.getStockQuotes(tickers);
-		    for(int i=0;i<tickers.size();i++){
-		    	ps = _preparedStatements.get(PreparedStatementID.updatePrices);
-			    ps.setString(1, prices.get(i));
-			    ps.setString(2, tickers.get(i));
-			    rs = ps.executeQuery();
-		    }
-		    ps = null;
-		    rs = null;
 		    
+		    boolean oldAutoCommitState = con.getAutoCommit();
+	    	con.setAutoCommit(false);
+		    try {
+			    ps = null;
+			    rs = null;
+			    List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
+			    for (int i = 0; i < tickers.size(); i++){
+			    	ps = _preparedStatements.get(PreparedStatementID.updatePrices);
+				    ps.setBigDecimal(1, prices.get(i));
+				    ps.setString(2, tickers.get(i));
+				    ps.executeUpdate();
+			    }
+			    con.commit();
+		    } catch (SQLException e) {
+		    	con.rollback();
+		    }
+		    con.setAutoCommit(oldAutoCommitState);
+	
+		    ps = null;
+		    rs = null;
 		    ps = _preparedStatements.get(PreparedStatementID.getLeaderBoard);
 		    rs = ps.executeQuery();
-		    while(rs.next()){
+		    while (rs.next()){
 		    	LeaderBoard lb = new LeaderBoard(rs.getString(2), rs.getString(3), rs.getBigDecimal(4));
 		    	leaders.add(lb);
 		    }
