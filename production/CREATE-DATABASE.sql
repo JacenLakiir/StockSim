@@ -32,7 +32,7 @@ CREATE TABLE Portfolio(
 CREATE TABLE Stock_Holdings(
   PID VARCHAR(30) NOT NULL REFERENCES Portfolio(PID),
   ticker VARCHAR(10) NOT NULL,
-  num_shares INTEGER NOT NULL,
+  num_shares INTEGER NOT NULL CHECK(num_shares>=0),
   avg_price_bought NUMERIC(1000,2) NOT NULL,
   PRIMARY KEY(PID, Ticker)
 );
@@ -68,8 +68,8 @@ CREATE FUNCTION exec_Transaction() RETURNS trigger AS $exec_Transaction$
     SELECT avg_price_bought INTO current_avg_price FROM Stock_Holdings WHERE PID=new.PID AND ticker=new.ticker;
     
     IF new.type='Buy' AND (new.price*new.num_shares) > current_cash THEN
-          RAISE EXCEPTION 'NOT ENOUGH CASH TO EXECUTE TRANSACTION';
-    ELSIF new.type='Sell' AND  current_num_shares < new.num_shares THEN
+      RAISE EXCEPTION 'NOT ENOUGH CASH TO EXECUTE TRANSACTION';
+    ELSIF new.type='Sell' AND  (current_num_shares < (-1*new.num_shares)) THEN
       RAISE EXCEPTION 'NOT ENOUGH SHARES TO EXECUTE TRANSACTION';
     ELSE
       UPDATE Portfolio SET cash=cash-(new.Price*new.num_shares) WHERE PID=new.PID;

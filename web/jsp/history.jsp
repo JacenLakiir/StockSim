@@ -73,7 +73,7 @@
               <td class="gr1"><%=t.getTime()%></td>
               <td class="gr1"><%=t.getType() %></td>
               <td class="gr1"><%=t.getTicker() %></td>
-              <td class="gr1"><%=t.getNumShares() %></td>
+              <td class="gr1"><%=Math.abs(t.getNumShares()) %></td>
               <td class="gr1">$<%=t.getPrice() %></td>
             </tr>
 <%      } %>

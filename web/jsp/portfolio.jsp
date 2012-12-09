@@ -102,7 +102,10 @@
           $<%=s.getAvgPriceBought() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
- <%       double percentChange = (prices.get(i).doubleValue() - s.getAvgPriceBought().doubleValue()) / s.getAvgPriceBought().doubleValue();%>
+<%        double roundedPrice = Double.parseDouble(String.format("%.2f", prices.get(i)));
+          double avgPriceBought = s.getAvgPriceBought().doubleValue();
+      double percentChange = (roundedPrice - avgPriceBought) / avgPriceBought;
+%>
           <%=String.format("%.2f", percentChange*100) %>%
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>

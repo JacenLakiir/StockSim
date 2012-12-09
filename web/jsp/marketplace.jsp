@@ -40,13 +40,14 @@
           <div align="center">
             <fieldset align="left">
               <legend>Transactions</legend>
-              <form name="performTransaction" action="performTransaction.jsp" method="get">
-                <select id="types">
-                  <option value="1">buy</option>
-                    <option value="2">sell</option>
+              <form name="perform-transaction" action="../jsp/perform-transaction.jsp" method="get">
+                <input type="hidden" name="pid" value=<%=(String) request.getParameter("pid") %>>
+                <select name="type">
+                  <option value="Buy">buy</option>
+                  <option value="Sell">sell</option>
                 </select>
-                <input type="number" name="numShares" min="1" step="1" dir="rtl" required="required"> share(s) of
-                <input type="text" name="stock" placeholder="GOOG" required="required" size="5">
+                <input type="number" name="numShares" min="1" step="1" dir="ltr" required="required" size="5"> share(s) of
+                <input type="text" name="ticker" placeholder="GOOG" required="required" size="5">
                 <input type="submit" value="Submit">
               </form>
             </fieldset>

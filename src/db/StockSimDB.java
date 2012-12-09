@@ -155,25 +155,25 @@ public class StockSimDB {
         return true;
     }
     
-    public void Perform_Transaction(String PID, String ticker, int num_shares, BigDecimal price, String type)
-    					throws SQLException{
+    public BigDecimal performTransaction(String PID, String type, int num_shares, String ticker) throws Exception {
     	 PreparedStatement ps;
          boolean oldAutoCommitState = con.getAutoCommit();
          con.setAutoCommit(false);
          try {
-             ps = _preparedStatements.get(PreparedStatementID.PERFORM_TRANSACTION);
+        	 BigDecimal price = YAPI_Reader.getPrice(ticker);
+        	 
+        	 ps = _preparedStatements.get(PreparedStatementID.PERFORM_TRANSACTION);
              ps.setString(1, PID);
              ps.setString(2, ticker);
              ps.setInt(3, num_shares);
              ps.setBigDecimal(4, price);
              ps.setString(5, type);
-          
              ps.executeUpdate();
              
              con.commit();
-             return;
+             return price;
          } 
-         catch (SQLException e) {
+         catch (Exception e) {
              try {con.rollback(); } catch (SQLException ignore) {}
              throw e;
          } finally {
