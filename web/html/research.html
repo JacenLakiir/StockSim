@@ -30,7 +30,7 @@
           <ul>
             <li><a href="../jsp/home.jsp">Home</a></li>
             <li><a href="research.html">Research</a></li>
-            <li><a href="leaderboards.html">Leaderboards</a></li>
+            <li><a href="../jsp/leaderboards.jsp">Leaderboards</a></li>
           </ul>
         </nav>
         
@@ -40,8 +40,9 @@
           <p>
             <fieldset align="left">
               <legend>By Stock</legend>
-                <form name="getStocks" action="getStocks.jsp" method="get">
-                  Look up stocks by symbol:<br><input type="search" name="stocks" size="50" placeholder="e.g. GOOG AAPL" required="required">
+                <form name="get-stocks" action="../jsp/get-stocks.jsp" method="get">
+                  Look up stocks by symbol:
+                  <br><input type="search" name="stocks" size="50" placeholder="e.g. GOOG AAPL" required="required">
                   <input type="submit" value="Get Stock Data">
                 </form>
             </fieldset>
@@ -50,16 +51,16 @@
           <p>
             <fieldset align="left">
               <legend>By Criteria</legend>
-              <form name="applyFilter" action="applyFilter.jsp" method="get">
+              <form name="apply-filter" action="apply-filter" method="get">
                 <label>Filter by: </label>
-                <select id="filters">
+                <select name="filters">
                   <option value="1">price</option>
                   <option value="2">% change</option>
                   <option value="3">beta</option>
                   <option value="4">P/E</option>
                   <option value="5">yield</option>
                 </select>
-                <select id="inequalities">
+                <select name="inequalities">
                   <option value="1">&lt;</option>
                   <option value="2">&le;</option>
                   <option value="3">&equiv;</option>
