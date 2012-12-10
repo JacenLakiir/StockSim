@@ -22,9 +22,23 @@
 
 <% String portfolioName = request.getParameter("portfolioName"); %>
 
-<% if (portfolioName == null) { %>
-    You need to specify a portfolio name.
-    Please <a href="../html/newPortfolio.html">try again</a>.
+<%  String username = (String) session.getAttribute("userID");
+    if (username == null) {
+%>
+        <p align="center">
+<%        out.println("Could not retrieve userID for current session."); %>
+        </p>
+        <p align="center">
+          <a href="../index.html">Please log in.</a>
+        </p>    
+<% }
+   else if (portfolioName == null) { %>
+     <p align="center">
+       You need to specify a portfolio name.
+     </p>
+     <p align="center">
+       Please <a href="../html/newPortfolio.html">try again</a>.
+     </p>
 <% }
    else { %>
 

@@ -40,7 +40,6 @@
         </p>    
 <%    } 
       else {
-		    String PID = request.getParameter("pid");
 		    String type = (String) request.getParameter("type");
 		    int numShares = Integer.parseInt(request.getParameter("numShares"));
 		    String ticker = (String) request.getParameter("ticker");

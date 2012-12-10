@@ -47,10 +47,10 @@
 <%  String username = (String) session.getAttribute("userID");
 	  if (username == null) {
 %>
-        <p>
+        <p align="center">
 <%        out.println("Could not retrieve userID for current session."); %>
 		    </p>
-		    <p>
+		    <p align="center">
 		      <a href="../index.html">Please log in.</a>
 		    </p>    
 <%  }
