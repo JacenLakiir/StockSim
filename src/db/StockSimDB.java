@@ -467,13 +467,13 @@ public class StockSimDB {
 		 }	    
     }
     
-    public boolean AuthenticatePID(String PID, String Username) throws SQLException{
+    public boolean isAuthorized(String username, String PID) throws SQLException{
     	PreparedStatement ps = null;
 		ResultSet rs = null;
 		boolean answer = false;
 		try {
 			ps = _preparedStatements.get(PreparedStatementID.AuthenticatePID);
-			ps.setString(1, Username);
+			ps.setString(1, username);
 			ps.setString(2, PID);
 		    rs = ps.executeQuery();
 		    rs.next();

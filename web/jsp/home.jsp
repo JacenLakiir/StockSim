@@ -44,85 +44,77 @@
 --%>
 <jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
 
-<%  try {
-    String username = (String) session.getAttribute("userID");
+<%  String username = (String) session.getAttribute("userID");
+	  if (username == null) {
 %>
+        <p>
+<%        out.println("Could not retrieve userID for current session."); %>
+		    </p>
+		    <p>
+		      <a href="../index.html">Please log in.</a>
+		    </p>    
+<%  }
+    else { 
+%> 
         <p align="center">
-        Welcome, <%=username %>!        
+          Welcome, <%=username %>!        
         </p>
-<%  } catch (Exception e) { %>
-    <p>
-<%    
-    out.println("Could not retrieve userID for current session.");
-    out.println(e.getMessage());
+<%      try {
+			    List<Portfolio> allPortfolios = db.getAllPortfolios(username);
+			    Collections.sort(allPortfolios, new Portfolio.NameComparator());
 %>
-    </p>    
-<%  } %>
+			    <div class="table">
+			      <table>
+			        <tr>
+			          <th>Portfolio</th>
+			          <th>Cash</th>
+			          <th>Market Value</th>
+			          <th>Rank</th>
+			          <th>Percentile</th>
+			        </tr>
+<%            for (int i = 0; i < allPortfolios.size(); i++) {
+	              Portfolio portfolio = allPortfolios.get(i);
+				        double totalMarketValue = portfolio.getCash().doubleValue();
+				        String PID = portfolio.getPID();
+				        
+				        List<Stock> stockHoldings = db.getStock_Holdings(PID).getStockHoldings();
+				        List<String> tickers = new ArrayList<String>();
+				        for (int j = 0; j < stockHoldings.size(); j++) {
+				          tickers.add(stockHoldings.get(j).getTicker());
+				        }
+				        if (tickers.size() > 0) {
+				          List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
+				          for (int j = 0; j < stockHoldings.size(); j++) {
+				            totalMarketValue += stockHoldings.get(j).getNumShares() * prices.get(j).doubleValue();
+				          }
+				        }
+				        
+				        List<Integer> rankStats = db.getRanking(PID);
+				        int rank = rankStats.get(0);
+				        int total = rankStats.get(1);
+				        double percentile = ((double) total - rank) / total * 100;
+%>
+				      <tr>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          <a href="portfolio.jsp?pid=<%=PID%>"><%=portfolio.getName()%></a>
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          $<%=portfolio.getCash() %>
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          $<%=String.format("%.2f", totalMarketValue) %>
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          <%=rank + " / " + total %>
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          <%=String.format("%.0f", percentile) %>
+				        </td>
+				      </tr>
+<%            } %>
+            </table>
+          </div>
         
-<%  try {
-    String username = (String) session.getAttribute("userID");
-    List<Portfolio> allPortfolios = db.getAllPortfolios(username);
-    Collections.sort(allPortfolios, new Portfolio.NameComparator());
-%>
-    <div class="table">
-      <table>
-        <tr>
-          <th>Portfolio</th>
-          <th>Cash</th>
-          <th>Market Value</th>
-          <th>Rank</th>
-          <th>Percentile</th>
-        </tr>
-<%    for (int i = 0; i < allPortfolios.size(); i++) {
-      Portfolio portfolio = allPortfolios.get(i);
-        double totalMarketValue = portfolio.getCash().doubleValue();
-        String PID = portfolio.getPID();
-        
-        List<Stock> stockHoldings = db.getStock_Holdings(PID).getStockHoldings();
-        List<String> tickers = new ArrayList<String>();
-        for (int j = 0; j < stockHoldings.size(); j++) {
-          tickers.add(stockHoldings.get(j).getTicker());
-        }
-        if (tickers.size() > 0) {
-          List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
-          for (int j = 0; j < stockHoldings.size(); j++) {
-            totalMarketValue += stockHoldings.get(j).getNumShares() * prices.get(j).doubleValue();
-          }
-        }
-        
-        List<Integer> rankStats = db.getRanking(PID);
-        int rank = rankStats.get(0);
-        int total = rankStats.get(1);
-        double percentile = ((double) total - rank) / total * 100;
-%>
-      <tr>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <a href="portfolio.jsp?pid=<%=PID%>"><%=portfolio.getName()%></a>
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          $<%=portfolio.getCash() %>
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          $<%=String.format("%.2f", totalMarketValue) %>
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=rank + " / " + total %>
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=String.format("%.0f", percentile) %>
-        </td>
-      </tr>
-<%    } %>
-      </table>
-    </div>
-<%  } catch (SQLException e) { %>
-    <p>
-<%    
-    out.println("Could not retrieve the user's portfolios.");
-    out.println(e.getMessage());
-%>
-    </p>  
-<%  } %>
         <p>
           <div align="center">
             <form name="newPortfolio" action="../html/newPortfolio.html">
@@ -130,6 +122,17 @@
             </form>
           </div>
         </p>
+<%      } catch (SQLException e) { %>
+          <p>
+<%    
+				    out.println("Could not retrieve the user's portfolios.");
+				    out.println(e.getMessage());
+%>
+          </p>  
+<%      }
+      }
+%>
+ 
       </div>
       
       <footer>

@@ -34,14 +34,43 @@
         </nav>
         
         <h3 align="center">Buy/Sell Stock</h3>
+       
+<%@ page import="java.sql.SQLException" %>
+
+<%-- The following locates object "db" of type "db.StockSimDB" from the
+     current session.  We have created this object in the listener
+     (src/listener/SessionListener.java) when the session was first
+     initialized.
+--%>
+<jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
         
-        
+<%  try {
+      String username = (String) session.getAttribute("userID");
+      String PID = request.getParameter("pid");
+      
+      if (username == null) {
+%>
+        <p align="center">
+<%        out.println("Could not retrieve userID for current session."); %>
+        </p>  
+        <p align="center">
+          <a href="../index.html">Please log in.</a>
+        </p>  
+<%    }
+      else if (!db.isAuthorized(username, PID)) {
+%>
+        <p align="center">
+<%        out.println("Access Denied - You do not own this portfolio."); %>
+        </p>    
+<%    } 
+      else {
+%> 
         <p>
           <div align="center">
             <fieldset align="left">
               <legend>Transactions</legend>
               <form name="perform-transaction" action="../jsp/perform-transaction.jsp" method="get">
-                <input type="hidden" name="pid" value=<%=request.getParameter("pid") %>>
+                <input type="hidden" name="pid" value=<%=PID %>>
                 <select name="type">
                   <option value="Buy">buy</option>
                   <option value="Sell">sell</option>
@@ -58,6 +87,15 @@
           <a href="portfolio.jsp?pid=<%=request.getParameter("pid") %>">Return to portfolio.</a>
         </p>  
       </div>
+<%      }
+      } catch (SQLException e) { %>
+          <p>
+<%    
+            out.println("Could not authenticate user's credentials.");
+            out.println(e.getMessage());
+%>
+          </p>  
+<%    } %>
       
       <footer>
         <p>

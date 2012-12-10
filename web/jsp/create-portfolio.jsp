@@ -22,33 +22,43 @@
 
 <% String portfolioName = request.getParameter("portfolioName"); %>
 
-<p>
 <% if (portfolioName == null) { %>
     You need to specify a portfolio name.
     Please <a href="../html/newPortfolio.html">try again</a>.
-<% } else { %>
+<% }
+   else { %>
 
     <h3 align="center">Create Portfolio: <%=portfolioName%></h3>
-    <%
+<%
     String username = (String) session.getAttribute("userID");
     BigDecimal cash = new BigDecimal(10000.00);
-    Portfolio portfolio = new Portfolio(portfolioName, username, cash);
-    try {
-        db.createPortfolio(portfolio);
-        out.println("New portfolio added to database.");
-        response.sendRedirect("home.jsp");
-    } catch (SQLException e) {
-        out.println("Could not add new portfolio to database.");
-        out.println(e.getMessage());
-    }
-    %>
-    
-<% } %>
-</p>
+    if (username == null) {
+%>
+        <p align="center">
+<%        out.println("Could not retrieve userID for current session."); %>
+        </p>
+        <p align="center">
+          <a href="../index.html">Please log in.</a>
+        </p>  
+<%  } else {
+%>      <p> <%
+        Portfolio portfolio = new Portfolio(portfolioName, username, cash);
+        try {
+            db.createPortfolio(portfolio);
+            out.println("New portfolio added to database.");
+            response.sendRedirect("home.jsp");
+        } catch (SQLException e) {
+            out.println("Could not add new portfolio to database.");
+            out.println(e.getMessage());
+        }
+%>      </p>
+        <p align="center">
+          <a href="home.jsp">Return to home page.</a>
+        </p>
+<%   }
+   } %>
 
-		<p align="center">
-		  <a href="home.jsp">Return to portfolio.</a>
-		</p>
+
   </div>
   
   <footer>

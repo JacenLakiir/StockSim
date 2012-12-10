@@ -46,137 +46,151 @@
 <jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
         
 <%  try {
+      String username = (String) session.getAttribute("userID");
       String PID = request.getParameter("pid");
-      String filter = request.getParameter("filter");
-      String numTransactions = request.getParameter("numTransactions");
-      String timeframe = request.getParameter("timeframe");
       
-      List<Transaction> history = new ArrayList<Transaction>();
-      if (filter == null) {
-        history = db.getTransactionHistoryByNumber(PID, 5);
+      if (username == null) {
 %>
-    <p align="center">
-<%        out.println("Showing the 5 most recent transactions:"); %>
-    </p>
+        <p align="center">
+<%        out.println("Could not retrieve userID for current session."); %>
+        </p>  
+        <p align="center">
+          <a href="../index.html">Please log in.</a>
+        </p>  
 <%    }
-      else if (filter.equals("numTransactions") && numTransactions != null) {
-      history = db.getTransactionHistoryByNumber(PID, Math.abs(Integer.parseInt(numTransactions)));
-%>
-    <p align="center">
-<%        out.println("Showing the " + numTransactions + " most recent transactions:"); %>
-    </p>
-<%    }
-      else if (filter.equals("timeframe") && timeframe != null) {
-      int numDays = 0;
-        if (timeframe.equals("week")) {
-          numDays = 7;
-        } else if (timeframe.equals("month")) {
-          numDays = 30;
-        } else if (timeframe.equals("3 months")) {
-          numDays = 90;
-        } else if (timeframe.equals("year")) {
-          numDays = 365;
-        }
-      history = db.getTransactionHistoryByTime(PID, numDays);
-      %>
-    <p align="center">
-<%        out.println("Showing transactions from within the past " + timeframe + ":"); %>
-    </p>
-<%   }
-      
-      if (history == null) {
+      else if (!db.isAuthorized(username, PID)) {
 %>
         <p align="center">
-<%        out.println("Empty history - no transactions performed yet."); %>
-        </p>
-<%    } else if (history.size() == 0 && timeframe != null) {
-%>
-        <p align="center">
-<%        out.println("No transactions took place within the last " + timeframe + "."); %>
-        </p>
-<%    } else if (history.size() == 0) {
-%>
-        <p align="center">
-<%        out.println("Empty history - no transactions performed yet."); %>
-        </p>
-<%    } else { %>
-
-        <p>
-        <div class="table">
-          <table>
-            <tr>
-              <th>Timestamp</th>
-              <th>Type</th>
-              <th>Stock</th>
-              <th>Number of Shares</th>
-              <th>Price</th>
-            </tr>
-
-<%        for (int i = 0; i < history.size(); i++) { 
-        Transaction t = history.get(i);
-%>
-            <tr>
-              <td class="gr1"><%=t.getTime()%></td>
-              <td class="gr1"><%=t.getType() %></td>
-              <td class="gr1"><%=t.getTicker() %></td>
-              <td class="gr1"><%=Math.abs(t.getNumShares()) %></td>
-              <td class="gr1">$<%=t.getPrice() %></td>
-            </tr>
-<%      } %>
-          </table>
-        </div>
+<%        out.println("Access Denied - You do not own this portfolio."); %>
+        </p>    
+<%    } 
+      else {
+        try {
+          String filter = request.getParameter("filter");
+          String numTransactions = request.getParameter("numTransactions");
+          String timeframe = request.getParameter("timeframe");
           
-        <p>
-          <div align="center">
-            <fieldset align="left">
-              <legend>Show: </legend>
-              <form name="history" action="history.jsp" method="get">
-                <input type="hidden" name="pid" value=<%=request.getParameter("pid") %>>
-                <input type="radio" name="filter" value="numTransactions" checked="checked">
-                  <label>
-                    <select name="numTransactions">
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="25">25</option>
-                      <option value="50">50</option>
-                      <option value="100">100</option>
-                    </select> most recent transactions
-                  </label><br>
-                <input type="radio" name="filter" value="timeframe">
-                  <label> past
-                    <select name="timeframe">
-                      <option value="week">week</option>
-                      <option value="month">month</option>
-                      <option value="3 months">3 months</option>
-                      <option value="year">year</option>
-                    </select> of transactions
-                  </label>
-                <p align="center">
-                <input type="submit" value="Update">
-                </p>
-              </form>
-            </fieldset>    
-          </div>      
-        </p>
-        
-<%    }
-    } catch (SQLException e) { %>
-    <p>
+          List<Transaction> history = new ArrayList<Transaction>();
+          if (filter == null) {
+            history = db.getTransactionHistoryByNumber(PID, 5);
+%>
+            <p align="center">
+<%          out.println("Showing the 5 most recent transactions:"); %>
+            </p>
+<%        }
+          else if (filter.equals("numTransactions") && numTransactions != null) {
+            history = db.getTransactionHistoryByNumber(PID, Math.abs(Integer.parseInt(numTransactions)));
+%>
+            <p align="center">
+<%            out.println("Showing the " + numTransactions + " most recent transactions:"); %>
+            </p>
+<%        }
+          else if (filter.equals("timeframe") && timeframe != null) {
+            int numDays = 0;
+            if (timeframe.equals("week")) {
+              numDays = 7;
+            } else if (timeframe.equals("month")) {
+              numDays = 30;
+            } else if (timeframe.equals("3 months")) {
+              numDays = 90;
+            } else if (timeframe.equals("year")) {
+              numDays = 365;
+            }
+            history = db.getTransactionHistoryByTime(PID, numDays);
+%>
+            <p align="center">
+<%            out.println("Showing transactions from within the past " + timeframe + ":"); %>
+            </p>
+<%        }
+          
+          if (history == null) {
+%>
+            <p align="center">
+<%            out.println("Empty history - no transactions performed yet."); %>
+            </p>
+<%        } else if (history.size() == 0 && timeframe != null) { %>
+            <p align="center">
+<%            out.println("No transactions took place within the last " + timeframe + "."); %>
+            </p>
+<%        } else if (history.size() == 0) { %>
+            <p align="center">
+<%            out.println("Empty history - no transactions performed yet."); %>
+            </p>
+<%        } else { %>
+            <p>
+            <div class="table">
+              <table>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Type</th>
+                  <th>Stock</th>
+                  <th>Number of Shares</th>
+                  <th>Price</th>
+                </tr>
+    
+<%            for (int i = 0; i < history.size(); i++) { 
+                  Transaction t = history.get(i);
+%>
+                  <tr>
+                    <td class="gr1"><%=t.getTime()%></td>
+                    <td class="gr1"><%=t.getType() %></td>
+                    <td class="gr1"><%=t.getTicker() %></td>
+                    <td class="gr1"><%=Math.abs(t.getNumShares()) %></td>
+                    <td class="gr1">$<%=t.getPrice() %></td>
+                  </tr>
+<%            } %>
+              </table>
+            </div>
+              
+            <p>
+              <div align="center">
+                <fieldset align="left">
+                  <legend>Show: </legend>
+                  <form name="history" action="history.jsp" method="get">
+                    <input type="hidden" name="pid" value=<%=request.getParameter("pid") %>>
+                    <input type="radio" name="filter" value="numTransactions" checked="checked">
+                      <label>
+                        <select name="numTransactions">
+                          <option value="5">5</option>
+                          <option value="10">10</option>
+                          <option value="25">25</option>
+                          <option value="50">50</option>
+                          <option value="100">100</option>
+                        </select> most recent transactions
+                      </label><br>
+                    <input type="radio" name="filter" value="timeframe">
+                      <label> past
+                        <select name="timeframe">
+                          <option value="week">week</option>
+                          <option value="month">month</option>
+                          <option value="3 months">3 months</option>
+                          <option value="year">year</option>
+                        </select> of transactions
+                      </label>
+                    <p align="center">
+                    <input type="submit" value="Update">
+                    </p>
+                  </form>
+                </fieldset>    
+              </div>      
+            </p>
+            
+<%        }
+        } catch (SQLException e) { %>
+          <p>
 <%    
-      out.println("Could not retrieve the transaction history for this portfolio.");
-      out.println(e.getMessage());
+            out.println("Could not retrieve the transaction history for this portfolio.");
+            out.println(e.getMessage());
 %>
-    </p>  
-<%  } %>
+          </p>  
+<%      } %>
 
-<%  try {
-      String PID = (String) request.getParameter("pid");
-%>
-      <p align="center">
-        <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
-      </p>
-<%  } catch (Exception e) {
-        out.println(e);
+          <p align="center">
+            <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
+          </p>
+<%    }
+    } catch (SQLException e) {
+      out.println("Could not authenticate user's credentials.");
     }
 %>  
       </div>

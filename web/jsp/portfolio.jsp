@@ -43,126 +43,143 @@
 <jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
 
 <%  try {
-      String PID = (String) request.getParameter("pid");
-    String portfolioName = db.getPortfolioName(PID);
-%>
-        <h3 align="center"><%=portfolioName %></h3>      
-<%  } catch (Exception e) { %>
-    <p>
-<%    
-    out.println("Could not retrieve portfolio for current session.");
-    out.println(e.getMessage());
-%>
-    </p>    
-<%  } %>
-        
-<%  try {
       String username = (String) session.getAttribute("userID");
-      String PID = (String) request.getParameter("pid");
-      Portfolio portfolio = db.getStock_Holdings(PID);
-      List<Stock> stockHoldings = portfolio.getStockHoldings();
-      if (stockHoldings == null || stockHoldings.size() == 0) {
+      String PID = request.getParameter("pid");
+      
+      if (username == null) {
 %>
-        <p>
-<%        out.println("Empty portfolio - no stocks held."); %>
-      </p>
+        <p align="center">
+<%        out.println("Could not retrieve userID for current session."); %>
+        </p>  
+        <p align="center">
+          <a href="../index.html">Please log in.</a>
+        </p>  
 <%    }
+      else if (!db.isAuthorized(username, PID)) {
+%>
+        <p align="center">
+<%        out.println("Access Denied - You do not own this portfolio."); %>
+        </p>    
+<%    } 
       else {
-        String sortStyle = (String) request.getParameter("sort");
-        if (sortStyle != null) {
-          if (sortStyle.equals("ticker")) {
-            Collections.sort(stockHoldings, new TickerComparator());
-          }
-          else if (sortStyle.equals("numShares")) {
-            Collections.sort(stockHoldings, new NumSharesComparator());
-            Collections.reverse(stockHoldings);
-          }
-        }
-        else {
-          Collections.sort(stockHoldings, new TickerComparator());
-        }
-        
-        List<String> tickers = new ArrayList<String>();
-        for (int i = 0; i < stockHoldings.size(); i++) {
-          tickers.add(stockHoldings.get(i).getTicker());
-        }
-        List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
-%>
-    <div class="table">
-      <table>
-        <tr>
-          <th>Stock</th>
-          <th>Number of Shares</th>
-          <th>Current Price</th>
-          <th>Avg. Price Bought</th>
-          <th>% Change</th>
-          <th>Current Value</th>
-        </tr>
-<%    double totalMarketValue = 0;
-    for (int i = 0; i < stockHoldings.size(); i++) {
-      Stock s = stockHoldings.get(i);
-      BigDecimal price = prices.get(i);
-%>
-      <tr>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=s.getTicker() %>
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <%=s.getNumShares() %>
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          $<%=String.format("%.2f", price) %>
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          $<%=s.getAvgPriceBought() %>
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-<%        double roundedPrice = Double.parseDouble(String.format("%.2f", price));
-          double avgPriceBought = s.getAvgPriceBought().doubleValue();
-          double percentChange = (roundedPrice - avgPriceBought) / avgPriceBought;
-%>
-          <%=String.format("%.2f", percentChange*100) %>%
-        </td>
-        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-<%        double marketValue = s.getNumShares() * price.doubleValue();
-          totalMarketValue += marketValue;
-%>
-          $<%=String.format("%.2f", marketValue) %>
-        </td>
-      </tr>
-<%    } %>
-      </table>
-    </div>
-    
-      <p align="center">
-        <form name="portfolio" action="portfolio.jsp?" method="get">
-          <input type="hidden" name="pid" value="<%=PID %>">
-          <p align="center">
-            <label>Sort portfolio by: </label>
-            <select name="sort">
-              <option value="ticker">ticker</option>
-              <option value="numShares">num. shares</option>
-            </select>
-            <input type="submit" value="Sort">
-          </p>
-        </form>
-      </p>
-        
-      <p align="center">
-        Cash Remaining: $<%=portfolio.getCash()%><br>
-        Total Market Value: $<%=String.format("%.2f", totalMarketValue + portfolio.getCash().doubleValue()) %>
-      </p>
-<%    }
-  } catch (SQLException e) { %>
-    <p>
+
+	    	try {
+	    	  String portfolioName = db.getPortfolioName(PID);
+	%>
+	        <h3 align="center"><%=portfolioName %></h3>      
+	<%    } catch (Exception e) { %>
+	       <p>
 <%    
-    out.println("Could not retrieve the stock holdings for this portfolio.");
-    out.println(e.getMessage());
+			    out.println("Could not retrieve portfolio for current session.");
+			    out.println(e.getMessage());
 %>
-    </p>  
-<%  } %>
+        </p>    
+<%     } %>
         
-<%  String PID = (String) request.getParameter("pid");%>
+<%     try {
+		      Portfolio portfolio = db.getStock_Holdings(PID);
+		      List<Stock> stockHoldings = portfolio.getStockHoldings();
+		      if (stockHoldings == null || stockHoldings.size() == 0) {
+%>
+            <p>
+<%            out.println("Empty portfolio - no stocks held."); %>
+            </p>
+<%        }
+		      else {
+		        String sortStyle = (String) request.getParameter("sort");
+		        if (sortStyle != null) {
+		          if (sortStyle.equals("ticker")) {
+		            Collections.sort(stockHoldings, new TickerComparator());
+		          }
+		          else if (sortStyle.equals("numShares")) {
+		            Collections.sort(stockHoldings, new NumSharesComparator());
+		            Collections.reverse(stockHoldings);
+		          }
+		        }
+		        else {
+		          Collections.sort(stockHoldings, new TickerComparator());
+		        }
+		        
+		        List<String> tickers = new ArrayList<String>();
+		        for (int i = 0; i < stockHoldings.size(); i++) {
+		          tickers.add(stockHoldings.get(i).getTicker());
+		        }
+		        List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
+%>
+				    <div class="table">
+				      <table>
+				        <tr>
+				          <th>Stock</th>
+				          <th>Number of Shares</th>
+				          <th>Current Price</th>
+				          <th>Avg. Price Bought</th>
+				          <th>% Change</th>
+				          <th>Current Value</th>
+				        </tr>
+<%          double totalMarketValue = 0;
+				    for (int i = 0; i < stockHoldings.size(); i++) {
+				      Stock s = stockHoldings.get(i);
+				      BigDecimal price = prices.get(i);
+%>
+				      <tr>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          <%=s.getTicker() %>
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          <%=s.getNumShares() %>
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          $<%=String.format("%.2f", price) %>
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+				          $<%=s.getAvgPriceBought() %>
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+<%                double roundedPrice = Double.parseDouble(String.format("%.2f", price));
+				          double avgPriceBought = s.getAvgPriceBought().doubleValue();
+				          double percentChange = (roundedPrice - avgPriceBought) / avgPriceBought;
+%>
+				          <%=String.format("%.2f", percentChange*100) %>%
+				        </td>
+				        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+<%                double marketValue = s.getNumShares() * price.doubleValue();
+				          totalMarketValue += marketValue;
+%>
+				          $<%=String.format("%.2f", marketValue) %>
+				        </td>
+				      </tr>
+<%        } %>
+				      </table>
+				    </div>
+    
+			      <p align="center">
+			        <form name="portfolio" action="portfolio.jsp?" method="get">
+			          <input type="hidden" name="pid" value="<%=PID %>">
+			          <p align="center">
+			            <label>Sort portfolio by: </label>
+			            <select name="sort">
+			              <option value="ticker">ticker</option>
+			              <option value="numShares">num. shares</option>
+			            </select>
+			            <input type="submit" value="Sort">
+			          </p>
+			        </form>
+			      </p>
+        
+			      <p align="center">
+			        Cash Remaining: $<%=portfolio.getCash()%><br>
+			        Total Market Value: $<%=String.format("%.2f", totalMarketValue + portfolio.getCash().doubleValue()) %>
+			      </p>
+<%      }
+		 } catch (SQLException e) { %>
+        <p>
+<%    
+			    out.println("Could not retrieve the stock holdings for this portfolio.");
+			    out.println(e.getMessage());
+%>
+        </p>  
+<%    } %>
+        
         <nav>
           <ul>
             <li><a href="marketplace.jsp?pid=<%=PID%>">Buy/Sell Stock</a></li>
@@ -170,7 +187,15 @@
             <li><a href="performance.html">Performance</a></li>
           </ul>
         </nav>
-        
+<%   }
+   } catch (SQLException e) { %>
+    <p>
+<%    
+		  out.println("Could not authenticate user's credentials.");
+		  out.println(e.getMessage());
+%>
+    </p>  
+<% } %>
       </div>
       
       <footer>
