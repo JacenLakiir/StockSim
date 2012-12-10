@@ -24,27 +24,44 @@
    String password = request.getParameter("password");
 %>
 
-<p>
 <% if (username == null) { %>
-    You need to specify a username.
-    Please <a href="<%=request.getContextPath()%>/login.jsp">try again</a>.
+    <p align="center">
+	    You need to specify a username.
+	  </p>
+    <p align="center">
+	    Please <a href="../index.html">try again</a>.
+	  </p>
 <% } else if (password == null) { %>
-    You need to specify a password.
-    Please <a href="<%=request.getContextPath()%>/login.jsp">try again</a>.
+    <p align="center">
+	    You need to specify a password.
+	  </p>
+    <p align="center">
+	    Please <a href="../index.html">try again</a>.
+	  </p>
 <% } else { %>
 
     <h3 align="center">Logging In: <%=username%></h3>
-    <%
+<%
     try {
       boolean isAuthorized = db.AuthLogin(username, password);
         if (isAuthorized) {
-          out.println("User credentials verified. Logging in.");
+%>        
+          <p align="center">
+            out.println("User credentials verified. Logging in.");
+          </p>
+<%
           session.setAttribute("userID", username);
           response.sendRedirect("home.jsp");
         }
         else {
-          out.println("Credentials do not match those of any known users. Login failed.");
-        }
+%>        
+          <p align="center">
+            out.println("Credentials do not match those of any known users. Login failed.");
+          </p>
+          <p align="center">
+            Please <a href="../index.html">try again</a>
+          </p>
+<%      }
     } catch (SQLException e) {
         out.println("Database could not be accessed.");
         out.println(e.getMessage());
