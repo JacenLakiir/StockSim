@@ -4,23 +4,27 @@
 by Eric Mercer & David Liu
 ==========================
 
-NOTE: All tasks should be performed on the class virtual machine.
+NOTE: All tasks should be performed on the class virtual machine. All scripts should be run from the top-level directory of the project.
 
-After importing the zip file's contents into a Java project using Eclipse for Java Developers, go to:
+1) Importing the zip file's contents into a Java project using Eclipse for Java Developers.
 
-  Properties-->Java Build Path-->Libraries-->Add Library
+2) Add the Tomcat library to the build path by right-clicking on the project and selecting:
 
-Then select:
+      Properties --> Java Build Path --> Libraries --> Add Library
+   
+   Then select:
+       
+      Server Runtime-->Apache Tomcat v6.0-->Finish-->OK.
 
-  Server Runtime-->Apache Tomcat v6.0-->Finish-->OK.
+3) Create the database and load the production dataset into the database by running:
+      
+      psql -af production/CREATE-DATABASE.sql
+      psql -af production/CREATE-PRODUCTION.sql
 
-Our production dataset can be created by running 'ProductionDatasetGenerator.java' located in the 'src/production' folder. This will create a file called CREATE-PRODUCTION.sql in the top-level 'production' folder. From this folder, all the database scripts can be executed.
+4) Compile and deploy the application to the local Tomcat server by running:
+      
+      ant deploy
 
-To create the database schema and load the production dataset into the database, run:
-  psql -af CREATE-DATABASE.sql
-  psql -af CREATE-PRODUCTION.sql
+5) Open Chromium and go to 'tomcat.my.net/stocksim/' to access the website.
 
-The website then needs to be deployed to the local Tomcat server. From the top-level of the project, run:
-  ant deploy
-
-In Chromium, open 'tomcat.my.net/stocksim/' to access the website Login as 'User#' where # is between 0 and 99 (inclusive) using the password 'password'. Alternatively, create a new user account.
+6) Login as 'User#' where # is in the range [0, 99] using the password 'password'. Alternatively, create a new user account.
