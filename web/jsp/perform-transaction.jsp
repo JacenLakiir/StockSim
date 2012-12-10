@@ -42,9 +42,9 @@
         </p>    
 <%    } 
       else {
-		    String type = (String) request.getParameter("type");
+		    String type = request.getParameter("type");
 		    int numShares = Integer.parseInt(request.getParameter("numShares"));
-		    String ticker = (String) request.getParameter("ticker");
+		    String ticker = request.getParameter("ticker").toUpperCase();
 %>
 
 				<h3 align="center">Perform Transaction: <%=type + " " + numShares + " of " + ticker %></h3>
