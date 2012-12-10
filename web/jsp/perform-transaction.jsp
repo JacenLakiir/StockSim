@@ -120,7 +120,7 @@
 %>
     </p>  
     <p align="center">
-      Please <a href="marketplace.jsp">try again.</a>
+      Please <a href="marketplace.jsp?pid=<%=request.getParameter("pid") %>">try again.</a>
     </p>   
 <%  } %>
 
