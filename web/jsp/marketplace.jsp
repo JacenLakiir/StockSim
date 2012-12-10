@@ -30,6 +30,7 @@
             <li><a href="home.jsp">Home</a></li>
             <li><a href="../html/research.html">Research</a></li>
             <li><a href="leaderboards.jsp">Leaderboards</a></li>
+            <li><a href="logout.jsp">Sign Out</a></li>
           </ul>
         </nav>
         
