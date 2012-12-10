@@ -475,7 +475,7 @@ public class StockSimDB {
 		    rs.next();
 		    int rank = rs.getInt(1);
 		    if (mktvalue.compareTo(BigDecimal.valueOf(10000)) < 0) {
-		    	rank += getNumNonNullMarketValues();
+		    	rank += total - getNumNonNullMarketValues();
 		    }
 		    ranking.add(rank);
 		    ranking.add(total);
