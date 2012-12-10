@@ -121,6 +121,11 @@
               <input type="submit" value="Create New Portfolio">
             </form>
           </div>
+          <div align="center">
+            <form name="deletePortfolio" action="../html/deletePortfolio.html">
+              <input type="submit" value="Delete Portfolio">
+            </form>
+          </div>
         </p>
 <%      } catch (SQLException e) { %>
           <p>

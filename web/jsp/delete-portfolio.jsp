@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>Portfolio Created!</title>
+  <title>Portfolio Deleted!</title>
   <link rel="stylesheet" type="text/css" href="../css/style.css" />
 </head>
 
@@ -24,7 +24,7 @@
     String portfolioName = request.getParameter("portfolioName");
     if (username == null) {
 %>
-        <h3 align="center">Create Portfolio</h3>
+        <h3 align="center">Delete Portfolio</h3>
         <p align="center">
 <%        out.println("Could not retrieve userID for current session."); %>
         </p>
@@ -33,26 +33,22 @@
         </p>    
 <% }
    else if (portfolioName == null) { %>
-     <h3 align="center">Create Portfolio</h3>
+     <h3 align="center">Delete Portfolio</h3>
      <p align="center">
        You need to specify a portfolio name.
      </p>
      <p align="center">
-       Please <a href="../html/newPortfolio.html">try again</a>.
+       Please <a href="../html/deletePortfolio.html">try again</a>.
      </p>
 <% }
    else { %>
-      <h3 align="center">Create Portfolio: <%=portfolioName%></h3>
-<%
-       BigDecimal cash = new BigDecimal(10000.00);
-%>     <p> <%
-       Portfolio portfolio = new Portfolio(portfolioName, username, cash);
-       try {
-           db.createPortfolio(portfolio);
-           out.println("New portfolio added to database.");
+      <h3 align="center">Delete Portfolio: <%=portfolioName%></h3>
+<%     try {
+           db.deletePortfolio(username, portfolioName);
+           out.println("Portfolio deleted from database.");
            response.sendRedirect("home.jsp");
        } catch (SQLException e) {
-           out.println("Could not add new portfolio to database.");
+           out.println("Could not delete portfolio from database.");
            out.println(e.getMessage());
        }
 %>     </p>

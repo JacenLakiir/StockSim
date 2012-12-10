@@ -26,6 +26,7 @@ public class StockSimDB {
     protected enum PreparedStatementID {
 		CREATE_NEW_USER("INSERT INTO Users VALUES(?,?,?)"),
 		CREATE_NEW_PORTFOLIO("INSERT INTO Portfolio VALUES(?, ?, ?, ?, ?);"),
+		DELETE_PORTFOLIO("DELETE FROM PORTFOLIO WHERE username=? AND portfolio_name=? CASCADE"),
 		AUTH_LOGIN("SELECT username FROM Users WHERE username=? AND password=?"),
 		PERFORM_TRANSACTION("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())"),
 		GET_TRANSACTION_HISTORY_BY_TIME("SELECT * FROM Transaction WHERE PID=? AND time>=(now()-?) ORDER BY time DESC"),
@@ -123,7 +124,6 @@ public class StockSimDB {
          con.setAutoCommit(false);
          try {
         	 // Generate unique PID
-        	 // TODO: verify uniqueness and performance
         	 StringBuilder PID = new StringBuilder("P");
         	 PID.append(System.nanoTime());
         	 
@@ -148,6 +148,26 @@ public class StockSimDB {
              try {con.setAutoCommit(oldAutoCommitState); } catch (SQLException ignore) {}
          }
     }
+    
+    public void deletePortfolio(String username, String portfolioName) throws SQLException{
+   	 PreparedStatement ps;
+        boolean oldAutoCommitState = con.getAutoCommit();
+        con.setAutoCommit(false);
+        try {
+            ps = _preparedStatements.get(PreparedStatementID.DELETE_PORTFOLIO);
+            ps.setString(1, username);
+            ps.setString(2, portfolioName);
+            ps.executeUpdate();
+            con.commit();
+            return;
+        } 
+        catch (SQLException e) {
+            try {con.rollback(); } catch (SQLException ignore) {}
+            throw e;
+        } finally {
+            try {con.setAutoCommit(oldAutoCommitState); } catch (SQLException ignore) {}
+        }
+   }
     
     public boolean AuthLogin(String username, String password) throws SQLException{
     	PreparedStatement ps;
