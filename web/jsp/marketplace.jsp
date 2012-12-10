@@ -52,7 +52,11 @@
               </form>
             </fieldset>
           </div>
-        </p>        
+        </p>      
+      
+        <p align="center">
+          <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
+        </p>  
       </div>
       
       <footer>

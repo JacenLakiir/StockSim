@@ -46,6 +46,9 @@
 <% } %>
 </p>
 
+		<p align="center">
+		  <a href="home.jsp">Return to portfolio.</a>
+		</p>
   </div>
   
   <footer>

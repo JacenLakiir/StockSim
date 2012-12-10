@@ -80,6 +80,7 @@
 <%    } %>
       </table>
     </div>
+    <br>
 <%    }
   } catch (SQLException e) { %>
     <p>
