@@ -20,10 +20,11 @@
 --%>
 <jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
 
-<%  try {
-      String username = (String) session.getAttribute("userID");
-      String PID = request.getParameter("pid");
+<%  String username = (String) session.getAttribute("userID");
+    String PID = request.getParameter("pid");
+    String numberOfShares = request.getParameter("numShares");
       
+    try {
       if (username == null) {
 %>
         <h3 align="center">Perform Transaction</h3>
@@ -42,76 +43,85 @@
         </p>    
 <%    } 
       else {
-		    String type = request.getParameter("type");
-		    int numShares = Integer.parseInt(request.getParameter("numShares"));
-		    String ticker = request.getParameter("ticker").toUpperCase();
+        String type = request.getParameter("type");
+        int numShares = Integer.parseInt(numberOfShares);
+        String ticker = request.getParameter("ticker").toUpperCase();
 %>
 
-				<h3 align="center">Perform Transaction: <%=type + " " + numShares + " of " + ticker %></h3>
-				<p align="center">
+        <h3 align="center">Perform Transaction: <%=type + " " + numShares + " of " + ticker %></h3>
+        <p align="center">
 <%
-		    try {
-		        if (type.equals("Sell")) {
-		          numShares *= -1;
-		        }
-		        BigDecimal price = db.performTransaction(PID, type, numShares, ticker);
-		        
-		        boolean isPlural = (Math.abs(numShares) > 1);
-		        StringBuilder message = new StringBuilder("Transaction performed. ");
-		        message.append(Math.abs(numShares));
-		        message.append(" ");
-		        message.append(isPlural ? "shares" : "share");
-		        message.append(" of ");
-		        message.append(ticker);
-		        message.append(isPlural ? " have " : " has ");
-		        message.append("been ");
-		        message.append((type.equals("Buy") ? "purchased" : "sold"));
-		        message.append(" at $");
-		        message.append(String.format("%.2f", price.doubleValue()));
-		        message.append(" per share.");
-		        
-		        out.println(message.toString());
-		    } catch (SQLException e) {
-		      BigDecimal price = YAPI_Reader.getPrice(ticker);
-		      String error = e.getMessage();
-		      
-		      StringBuilder message = new StringBuilder("Could not perform transaction. ");
-		      if (error.contains("CASH")) {
-		        message.append("Would require $");
-		        message.append(String.format("%.2f", numShares * price.doubleValue()));
-		        message.append(" to purchase ");
-		        message.append(numShares);
-		        message.append(" share(s) of ");
-		        message.append(ticker);
-		        message.append(".");
-		      }
-		      else if (error.contains("SHARES")) {
-		        message.append("You don't own enough shares to sell ");
-		        message.append(Math.abs(numShares));
-		        message.append(" shares of ");
-		        message.append(ticker);
-		        message.append(".");
-		      }
-		      else if (error.contains("INVALID TICKER")) {
-		        message.append("The ticker ");
-		        message.append(ticker);
-		        message.append(" is invalid. This stock does not exist.");
-		      }
-		      out.println(message.toString());
-		    }
+        try {
+            if (type.equals("Sell")) {
+              numShares *= -1;
+            }
+            BigDecimal price = db.performTransaction(PID, type, numShares, ticker);
+            
+            boolean isPlural = (Math.abs(numShares) > 1);
+            StringBuilder message = new StringBuilder("Transaction performed. ");
+            message.append(Math.abs(numShares));
+            message.append(" ");
+            message.append(isPlural ? "shares" : "share");
+            message.append(" of ");
+            message.append(ticker);
+            message.append(isPlural ? " have " : " has ");
+            message.append("been ");
+            message.append((type.equals("Buy") ? "purchased" : "sold"));
+            message.append(" at $");
+            message.append(String.format("%.2f", price.doubleValue()));
+            message.append(" per share.");
+            
+            out.println(message.toString());
+        } catch (SQLException e) {
+          BigDecimal price = YAPI_Reader.getPrice(ticker);
+          String error = e.getMessage();
+          
+          StringBuilder message = new StringBuilder("Could not perform transaction. ");
+          if (error.contains("CASH")) {
+            message.append("Would require $");
+            message.append(String.format("%.2f", numShares * price.doubleValue()));
+            message.append(" to purchase ");
+            message.append(numShares);
+            message.append(" share(s) of ");
+            message.append(ticker);
+            message.append(".");
+          }
+          else if (error.contains("SHARES")) {
+            message.append("You don't own enough shares to sell ");
+            message.append(Math.abs(numShares));
+            message.append(" shares of ");
+            message.append(ticker);
+            message.append(".");
+          }
+          else if (error.contains("INVALID TICKER")) {
+            message.append("The ticker ");
+            message.append(ticker);
+            message.append(" is invalid. This stock does not exist.");
+          }
+          out.println(message.toString());
+        }
 %>
-		    </p>
-		    <p align="center">
-		      <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
-		    </p>
+        </p>
+        <p align="center">
+          <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
+        </p>
 <%    }
     } catch (SQLException e) { %>
-			 <p>
+       <p>
 <%    
-			  out.println("Could not authenticate user's credentials.");
-			  out.println(e.getMessage());
+        out.println("Could not authenticate user's credentials.");
+        out.println(e.getMessage());
 %>
-			</p>  
+      </p>  
+<%  } catch (NumberFormatException e) { %>
+    <p align="center">
+<%    
+     out.println(numberOfShares + " is not a valid number of shares.");
+%>
+    </p>  
+    <p align="center">
+      Please <a href="marketplace.jsp">try again.</a>
+    </p>   
 <%  } %>
 
   </div>
