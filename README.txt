@@ -14,7 +14,7 @@ NOTE: All tasks should be performed on the class virtual machine. All scripts sh
    
    Then select:
        
-      Server Runtime-->Apache Tomcat v6.0-->Finish-->OK.
+      Server Runtime --> Apache Tomcat v6.0 --> Finish --> OK.
 
 3) Create the database and load the production dataset into the database by running:
       
