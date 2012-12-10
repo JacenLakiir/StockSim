@@ -186,7 +186,6 @@
           <ul>
             <li><a href="marketplace.jsp?pid=<%=PID%>">Buy/Sell Stock</a></li>
             <li><a href="history.jsp?pid=<%=PID%>">Transaction History</a></li>
-            <li><a href="performance.html">Performance</a></li>
           </ul>
         </nav>
 <%   }
