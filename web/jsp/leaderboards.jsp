@@ -50,7 +50,7 @@
       if (topPortfolios == null || topPortfolios.size() == 0) {
 %>
         <p>
-<%          out.println("Empty history - no transactions performed yet."); %>
+<%          out.println("Empty leaderboards - no portfolios created yet."); %>
         </p>
 <%    } else { %>
     <div class="table">
