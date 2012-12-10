@@ -45,10 +45,11 @@ public class StockSimDB {
 		AuthenticatePID("SELECT EXISTS (SELECT PID FROM Portfolio WHERE username=? and PID=?)"),
 		getRank("SELECT COUNT(portfolio.PID)+1 AS Rank FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS values FROM stock_holdings, " +
 				"Stock_Prices WHERE stock_holdings.ticker=Stock_Prices.ticker GROUP BY PID) AS stock_value, portfolio WHERE portfolio.PID = " +
-				"stock_value.PID AND (portfolio.cash+stock_value.values)> (SELECT cash+SUM(Mkt_Value.values) FROM (SELECT PID, " +
-				"Stock_Prices.Price*num_shares as values from stock_holdings, Stock_Prices WHERE PID=? AND stock_holdings.ticker=" +
-				"Stock_Prices.ticker) AS Mkt_Value, portfolio WHERE portfolio.PID=Mkt_Value.PID GROUP BY portfolio.PID)"),
-		getTotalPortfolioNum("SELECT COUNT(PID) FROM Portfolio"); 
+				"stock_value.PID AND (portfolio.cash+stock_value.values)> ?"),
+		getTotalPortfolioNum("SELECT COUNT(PID) FROM Portfolio"),
+		getMktValue("select portfolio.PID, (select Sum(Stock_Prices.Price*num_shares)+(select cash from portfolio where portfolio.pid=?) as " +
+				"values from stock_holdings, Stock_Prices where stock_holdings.PID=? and stock_holdings.ticker=Stock_Prices.ticker) as Mkt_Value " +
+				"from portfolio where PID=?");
 		
         public final String sql;
         
@@ -461,12 +462,15 @@ public class StockSimDB {
     	
     	List<Integer> rank = new ArrayList<Integer>();
     	updateStockPrices();
-    	
+    	BigDecimal mktvalue = getMktValue(PID);
+    	if(mktvalue==null) mktvalue=BigDecimal.valueOf(10000);
     	PreparedStatement ps = null;
 		ResultSet rs = null;
+		
 		try {
 			ps = _preparedStatements.get(PreparedStatementID.getRank);
-		    ps.setString(1, PID);
+		    //ps.setString(1, PID);
+		    ps.setBigDecimal(1, mktvalue);
 		    rs = ps.executeQuery();
 		    rs.next();
 		    rank.add(rs.getInt(1));
@@ -507,10 +511,30 @@ public class StockSimDB {
 		 }	    	
     }
     
-    public static void main(String args[]){
-    	//StockSimDB db = new StockSimDB();
-    	java.util.Date date = new java.util.Date(System.currentTimeMillis()); 
-    	java.sql.Timestamp timeCreated = new java.sql.Timestamp(date.getTime());
-    	System.out.println(timeCreated);
+    public BigDecimal getMktValue(String PID) throws SQLException {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = _preparedStatements.get(PreparedStatementID.getMktValue);
+		    ps.setString(1, PID);
+		    ps.setString(2, PID);
+		    ps.setString(3, PID);
+		    rs = ps.executeQuery();
+		    rs.next();
+		    return rs.getBigDecimal(2);
+
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			// To conserve JDBC resources, be nice and call close().
+			// Although JDBC is supposed to call close() when these
+			// things get garbage-collected, the problem is that if
+			// you ever use connection pooling, if close() is not called
+			// explicitly, these resources won't be available for
+			// reuse, which can cause the connection pool to run out
+			// of its allocated resources.
+		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+		 }	    	
     }
 }
