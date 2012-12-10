@@ -41,7 +41,7 @@
             <fieldset align="left">
               <legend>Transactions</legend>
               <form name="perform-transaction" action="../jsp/perform-transaction.jsp" method="get">
-                <input type="hidden" name="pid" value=<%=(String) request.getParameter("pid") %>>
+                <input type="hidden" name="pid" value=<%=request.getParameter("pid") %>>
                 <select name="type">
                   <option value="Buy">buy</option>
                   <option value="Sell">sell</option>
@@ -55,7 +55,7 @@
         </p>      
       
         <p align="center">
-          <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
+          <a href="portfolio.jsp?pid=<%=request.getParameter("pid") %>">Return to portfolio.</a>
         </p>  
       </div>
       
