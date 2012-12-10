@@ -99,18 +99,18 @@
 		      }
 		      out.println(message.toString());
 		    }
-      }
 %>
-    </p>
-		<p align="center">
-		  <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
-		</p>
-<%  } catch (SQLException e) { %>
-			<p>
-			<%    
+		    </p>
+		    <p align="center">
+		      <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
+		    </p>
+<%    }
+    } catch (SQLException e) { %>
+			 <p>
+<%    
 			  out.println("Could not authenticate user's credentials.");
 			  out.println(e.getMessage());
-			%>
+%>
 			</p>  
 <%  } %>
 
