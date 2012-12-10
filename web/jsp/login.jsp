@@ -29,14 +29,14 @@
 	    You need to specify a username.
 	  </p>
     <p align="center">
-	    Please <a href="../index.html">try again</a>.
+	    Please <a href="../index.html">try again.</a>.
 	  </p>
 <% } else if (password == null) { %>
     <p align="center">
 	    You need to specify a password.
 	  </p>
     <p align="center">
-	    Please <a href="../index.html">try again</a>.
+	    Please <a href="../index.html">try again.</a>.
 	  </p>
 <% } else { %>
 
@@ -47,7 +47,7 @@
         if (isAuthorized) {
 %>        
           <p align="center">
-            out.println("User credentials verified. Logging in.");
+            User credentials verified. Logging in.
           </p>
 <%
           session.setAttribute("userID", username);
@@ -56,19 +56,19 @@
         else {
 %>        
           <p align="center">
-            out.println("Credentials do not match those of any known users. Login failed.");
+            Credentials do not match those of any known users. Login failed.
           </p>
           <p align="center">
-            Please <a href="../index.html">try again</a>
+            Please <a href="../index.html">try again.</a>
           </p>
 <%      }
     } catch (SQLException e) {
-        out.println("Database could not be accessed.");
-        out.println(e.getMessage());
-    }
-    %>
-
-<% } %>
+%>        <p>
+            Database could not be accessed.
+<%          out.println(e.getMessage()); %>
+          </p>
+<%  }
+   } %>
 </p>
   </div>
   
