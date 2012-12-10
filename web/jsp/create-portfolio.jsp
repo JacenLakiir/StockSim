@@ -25,6 +25,7 @@
 <%  String username = (String) session.getAttribute("userID");
     if (username == null) {
 %>
+        <h3 align="center">Create Portfolio</h3>
         <p align="center">
 <%        out.println("Could not retrieve userID for current session."); %>
         </p>
@@ -33,6 +34,7 @@
         </p>    
 <% }
    else if (portfolioName == null) { %>
+     <h3 align="center">Create Portfolio</h3>
      <p align="center">
        You need to specify a portfolio name.
      </p>
@@ -44,7 +46,6 @@
 
     <h3 align="center">Create Portfolio: <%=portfolioName%></h3>
 <%
-    String username = (String) session.getAttribute("userID");
     BigDecimal cash = new BigDecimal(10000.00);
     if (username == null) {
 %>

@@ -48,6 +48,7 @@
       
       if (username == null) {
 %>
+        <h3 align="center">Portfolio</h3>      
         <p align="center">
 <%        out.println("Could not retrieve userID for current session."); %>
         </p>  
@@ -57,6 +58,7 @@
 <%    }
       else if (!db.isAuthorized(username, PID)) {
 %>
+        <h3 align="center">Portfolio</h3>      
         <p align="center">
 <%        out.println("Access Denied - You do not own this portfolio."); %>
         </p>    
