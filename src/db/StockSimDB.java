@@ -26,7 +26,7 @@ public class StockSimDB {
     protected enum PreparedStatementID {
 		CREATE_NEW_USER("INSERT INTO Users VALUES(?,?,?)"),
 		CREATE_NEW_PORTFOLIO("INSERT INTO Portfolio VALUES(?, ?, ?, ?, ?);"),
-		DELETE_PORTFOLIO("DELETE FROM PORTFOLIO WHERE username=? AND portfolio_name=? CASCADE"),
+		DELETE_PORTFOLIO("DELETE FROM PORTFOLIO WHERE username=? AND portfolio_name=?"),
 		AUTH_LOGIN("SELECT username FROM Users WHERE username=? AND password=?"),
 		PERFORM_TRANSACTION("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())"),
 		GET_TRANSACTION_HISTORY_BY_TIME("SELECT * FROM Transaction WHERE PID=? AND time>=(now()-?) ORDER BY time DESC"),
