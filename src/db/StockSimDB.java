@@ -24,32 +24,32 @@ public class StockSimDB {
     }
 	
     protected enum PreparedStatementID {
-		CREATE_NEW_USER("INSERT INTO Users VALUES(?,?,?)"),
+		AUTHENTICATE_LOGIN("SELECT username FROM Users WHERE username=? AND password=?"),
+		AUTHENTICATE_PID("SELECT EXISTS (SELECT PID FROM Portfolio WHERE username=? and PID=?)"),
 		CREATE_NEW_PORTFOLIO("INSERT INTO Portfolio VALUES(?, ?, ?, ?, ?);"),
-		DELETE_PORTFOLIO("DELETE FROM PORTFOLIO WHERE username=? AND portfolio_name=?"),
-		AUTH_LOGIN("SELECT username FROM Users WHERE username=? AND password=?"),
-		PERFORM_TRANSACTION("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())"),
-		GET_TRANSACTION_HISTORY_BY_TIME("SELECT * FROM Transaction WHERE PID=? AND time>=(now()-?) ORDER BY time DESC"),
-		GET_TRANSACTION_HISTORY_BY_NUMBER("SELECT * FROM Transaction WHERE PID=? ORDER BY time DESC LIMIT ?"),
-		GET_STOCK_HOLDINGS("SELECT ticker, num_shares, avg_price_bought FROM Stock_Holdings WHERE PID=?"),
-		GET_PORTFOLIO_NAMES("SELECT portfolio_name FROM Portfolio WHERE username=?"),
-		GET_PORTFOLIO_INFO("SELECT portfolio_name, time_created, cash FROM Portfolio WHERE PID=?"),
-		GET_PID("SELECT PID FROM Portfolio WHERE username=? AND portfolio_name=?"),
+		CREATE_NEW_USER("INSERT INTO Users VALUES(?,?,?)"),
+		DELETE_PORTFOLIO("DELETE FROM Portfolio WHERE username=? AND portfolio_name=?"),
 		GET_ALL_PORTFOLIOS("SELECT PID, portfolio_name, username, time_created, cash FROM Portfolio WHERE username=?"),
+		GET_LEADERBOARDS("SELECT portfolio.PID, portfolio.username, portfolio.portfolio_name, portfolio.cash + stock_value.values AS Mkt_Value " +
+				"FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS VALUES FROM Stock_Holdings, Stock_Prices WHERE Stock_Holdings.ticker=Stock_Prices.ticker " +
+				"GROUP BY PID) AS stock_value, portfolio WHERE portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10"),
+		GET_MARKET_VALUE("SELECT portfolio.PID, (SELECT SUM(Stock_Prices.Price*num_shares)+(SELECT cash FROM portfolio WHERE portfolio.PID=?) AS " +
+						"VALUES FROM Stock_Holdings, Stock_Prices WHERE Stock_Holdings.PID=? AND Stock_Holdings.ticker=Stock_Prices.ticker) AS Mkt_Value " +
+						"FROM portfolio WHERE PID=?"),
+		GET_PID("SELECT PID FROM Portfolio WHERE username=? AND portfolio_name=?"),
+		GET_PORTFOLIO_INFO("SELECT portfolio_name, time_created, cash FROM Portfolio WHERE PID=?"),
+		GET_PORTFOLIO_NAMES("SELECT portfolio_name FROM Portfolio WHERE username=?"),
 		GET_PORTFOLIO_NAME_BY_PID("SELECT portfolio_name FROM Portfolio WHERE PID=?"),
-		getStockTickers("SELECT DISTINCT ticker FROM Stock_Prices"),
-		updatePrices("UPDATE Stock_Prices SET price=? WHERE ticker=?"),
-		getLeaderBoard("Select portfolio.PID, portfolio.username, portfolio.portfolio_name, portfolio.cash + stock_value.values as Mkt_Value " +
-			"from (select PID, Sum(Stock_Prices.price*num_shares) as values from stock_holdings, Stock_Prices where stock_holdings.ticker=Stock_Prices.ticker " +
-			"Group By PID) as stock_value, portfolio where portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10"),
-		AuthenticatePID("SELECT EXISTS (SELECT PID FROM Portfolio WHERE username=? and PID=?)"),
-		getRank("SELECT COUNT(portfolio.PID)+1 AS Rank FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS values FROM stock_holdings, " +
+		GET_RANK("SELECT COUNT(portfolio.PID)+1 AS Rank FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS values FROM stock_holdings, " +
 				"Stock_Prices WHERE stock_holdings.ticker=Stock_Prices.ticker GROUP BY PID) AS stock_value, portfolio WHERE portfolio.PID = " +
 				"stock_value.PID AND (portfolio.cash+stock_value.values)> ?"),
-		getTotalPortfolioNum("SELECT COUNT(PID) FROM Portfolio"),
-		getMktValue("select portfolio.PID, (select Sum(Stock_Prices.Price*num_shares)+(select cash from portfolio where portfolio.pid=?) as " +
-				"values from stock_holdings, Stock_Prices where stock_holdings.PID=? and stock_holdings.ticker=Stock_Prices.ticker) as Mkt_Value " +
-				"from portfolio where PID=?");
+		GET_STOCK_HOLDINGS("SELECT ticker, num_shares, avg_price_bought FROM Stock_Holdings WHERE PID=?"),
+		GET_STOCK_TICKERS("SELECT DISTINCT ticker FROM Stock_Prices"),
+		GET_TOTAL_PORTFOLIO_NUM("SELECT COUNT(PID) FROM Portfolio"),
+		GET_TRANSACTION_HISTORY_BY_NUMBER("SELECT * FROM Transaction WHERE PID=? ORDER BY time DESC LIMIT ?"),
+		GET_TRANSACTION_HISTORY_BY_TIME("SELECT * FROM Transaction WHERE PID=? AND time>=(now()-?) ORDER BY time DESC"),
+		PERFORM_TRANSACTION("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())"),
+		UPDATE_PRICES("UPDATE Stock_Prices SET price=? WHERE ticker=?"),;
 		
         public final String sql;
         
@@ -98,15 +98,15 @@ public class StockSimDB {
         return;
     }
 
-    public void CreateUser(Users user) throws SQLException{
+    public void createUser(Users user) throws SQLException{
     	 PreparedStatement ps;
          boolean oldAutoCommitState = con.getAutoCommit();
          con.setAutoCommit(false);
          try {
              ps = _preparedStatements.get(PreparedStatementID.CREATE_NEW_USER);
-             ps.setString(1, user.username);
-             ps.setString(2, user.password);
-             ps.setString(3, user.email);
+             ps.setString(1, user.getUsername());
+             ps.setString(2, user.getPassword());
+             ps.setString(3, user.getEmail());
              ps.executeUpdate();
              con.commit();
              return;
@@ -170,11 +170,11 @@ public class StockSimDB {
         }
    }
     
-    public boolean AuthLogin(String username, String password) throws SQLException{
+    public boolean authenticateLogin(String username, String password) throws SQLException{
     	PreparedStatement ps;
         ResultSet rs = null;
         // Get user:
-        ps = _preparedStatements.get(PreparedStatementID.AUTH_LOGIN);
+        ps = _preparedStatements.get(PreparedStatementID.AUTHENTICATE_LOGIN);
         ps.setString(1, username);
         ps.setString(2, password);
         rs = ps.executeQuery();
@@ -302,13 +302,6 @@ public class StockSimDB {
 		} catch (SQLException e) {
 			throw e;
 		} finally {
-			// To conserve JDBC resources, be nice and call close().
-			// Although JDBC is supposed to call close() when these
-			// things get garbage-collected, the problem is that if
-			// you ever use connection pooling, if close() is not called
-			// explicitly, these resources won't be available for
-			// reuse, which can cause the connection pool to run out
-			// of its allocated resources.
 //			    if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 //			    if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 		 }	    	
@@ -330,13 +323,6 @@ public class StockSimDB {
 		} catch (SQLException e) {
 			throw e;
 		} finally {
-			// To conserve JDBC resources, be nice and call close().
-			// Although JDBC is supposed to call close() when these
-			// things get garbage-collected, the problem is that if
-			// you ever use connection pooling, if close() is not called
-			// explicitly, these resources won't be available for
-			// reuse, which can cause the connection pool to run out
-			// of its allocated resources.
 		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 		 }	    	
@@ -358,13 +344,6 @@ public class StockSimDB {
 		} catch (SQLException e) {
 			throw e;
 		} finally {
-			// To conserve JDBC resources, be nice and call close().
-			// Although JDBC is supposed to call close() when these
-			// things get garbage-collected, the problem is that if
-			// you ever use connection pooling, if close() is not called
-			// explicitly, these resources won't be available for
-			// reuse, which can cause the connection pool to run out
-			// of its allocated resources.
 		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 		 }	    	
@@ -385,13 +364,6 @@ public class StockSimDB {
 		} catch (SQLException e) {
 			throw e;
 		} finally {
-			// To conserve JDBC resources, be nice and call close().
-			// Although JDBC is supposed to call close() when these
-			// things get garbage-collected, the problem is that if
-			// you ever use connection pooling, if close() is not called
-			// explicitly, these resources won't be available for
-			// reuse, which can cause the connection pool to run out
-			// of its allocated resources.
 		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 		 }	    	
@@ -402,7 +374,7 @@ public class StockSimDB {
 		ResultSet rs = null;
 		List<LeaderBoard> leaders = new ArrayList<LeaderBoard>();
 		try {
-			ps = _preparedStatements.get(PreparedStatementID.getLeaderBoard);
+			ps = _preparedStatements.get(PreparedStatementID.GET_LEADERBOARDS);
 		    rs = ps.executeQuery();
 		    while (rs.next()){
 		    	LeaderBoard lb = new LeaderBoard(rs.getString(2), rs.getString(3), rs.getBigDecimal(4));
@@ -426,7 +398,7 @@ public class StockSimDB {
         con.setAutoCommit(false);
         //Gets List of Stock Tickers
         try {
-			ps = _preparedStatements.get(PreparedStatementID.getStockTickers);
+			ps = _preparedStatements.get(PreparedStatementID.GET_STOCK_TICKERS);
 		    rs = ps.executeQuery();
 		    while (rs.next()) {
 		    	tickers.add(rs.getString(1));
@@ -444,7 +416,7 @@ public class StockSimDB {
 		   	rs = null;
 		   	List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
 		   	for (int i = 0; i < tickers.size(); i++){
-		   		ps = _preparedStatements.get(PreparedStatementID.updatePrices);
+		   		ps = _preparedStatements.get(PreparedStatementID.UPDATE_PRICES);
 		   		ps.setBigDecimal(1, prices.get(i));
 		   		ps.setString(2, tickers.get(i));
 		   		ps.executeUpdate();
@@ -468,7 +440,7 @@ public class StockSimDB {
 		ResultSet rs = null;
 		
 		try {
-			ps = _preparedStatements.get(PreparedStatementID.getRank);
+			ps = _preparedStatements.get(PreparedStatementID.GET_RANK);
 		    //ps.setString(1, PID);
 		    ps.setBigDecimal(1, mktvalue);
 		    rs = ps.executeQuery();
@@ -477,7 +449,7 @@ public class StockSimDB {
 		    
 		    ps = null;
 		    rs = null;
-		    ps = _preparedStatements.get(PreparedStatementID.getTotalPortfolioNum);
+		    ps = _preparedStatements.get(PreparedStatementID.GET_TOTAL_PORTFOLIO_NUM);
 		    rs = ps.executeQuery();
 		    rs.next();
 		    rank.add(rs.getInt(1));
@@ -496,7 +468,7 @@ public class StockSimDB {
 		ResultSet rs = null;
 		boolean answer = false;
 		try {
-			ps = _preparedStatements.get(PreparedStatementID.AuthenticatePID);
+			ps = _preparedStatements.get(PreparedStatementID.AUTHENTICATE_PID);
 			ps.setString(1, username);
 			ps.setString(2, PID);
 		    rs = ps.executeQuery();
@@ -515,7 +487,7 @@ public class StockSimDB {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
-			ps = _preparedStatements.get(PreparedStatementID.getMktValue);
+			ps = _preparedStatements.get(PreparedStatementID.GET_MARKET_VALUE);
 		    ps.setString(1, PID);
 		    ps.setString(2, PID);
 		    ps.setString(3, PID);
@@ -526,13 +498,6 @@ public class StockSimDB {
 		} catch (SQLException e) {
 			throw e;
 		} finally {
-			// To conserve JDBC resources, be nice and call close().
-			// Although JDBC is supposed to call close() when these
-			// things get garbage-collected, the problem is that if
-			// you ever use connection pooling, if close() is not called
-			// explicitly, these resources won't be available for
-			// reuse, which can cause the connection pool to run out
-			// of its allocated resources.
 		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
 		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
 		 }	    	

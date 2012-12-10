@@ -81,6 +81,7 @@ public class YAPI_Reader {
 		tag.put("Year High", "k0");
 		tag.put("Year Low", "j0");
 		tag.put("Year Range", "w0");
+		
 		DEFAULT_ATTRIBUTES = new ArrayList<String>();
 		DEFAULT_ATTRIBUTES.add("Ticker");
 		DEFAULT_ATTRIBUTES.add("Name");
@@ -196,5 +197,4 @@ public class YAPI_Reader {
 	public static List<String> getStockQuotes(List<String> tickers) throws Exception {
 		return getStockQuotes(tickers, DEFAULT_ATTRIBUTES);
 	}
-
 }

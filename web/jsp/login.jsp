@@ -43,8 +43,8 @@
     <h3 align="center">Logging In: <%=username%></h3>
 <%
     try {
-      boolean isAuthorized = db.AuthLogin(username, password);
-        if (isAuthorized) {
+      boolean isVerified = db.authenticateLogin(username, password);
+        if (isVerified) {
 %>        
           <p align="center">
             User credentials verified. Logging in.

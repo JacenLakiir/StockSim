@@ -35,7 +35,7 @@
     
     Users user = new Users(username, password, email);
     try {
-        db.CreateUser(user);
+        db.createUser(user);
         out.println("New user added to database.");
         session.setAttribute("userID", username);
         response.sendRedirect("home.jsp");
