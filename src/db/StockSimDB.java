@@ -31,18 +31,20 @@ public class StockSimDB {
 		DELETE_PORTFOLIO("DELETE FROM Portfolio WHERE username=? AND portfolio_name=?"),
 		GET_ALL_PORTFOLIOS("SELECT PID, portfolio_name, username, time_created, cash FROM Portfolio WHERE username=?"),
 		GET_LEADERBOARDS("SELECT portfolio.PID, portfolio.username, portfolio.portfolio_name, portfolio.cash + stock_value.values AS Mkt_Value " +
-				"FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS VALUES FROM Stock_Holdings, Stock_Prices WHERE Stock_Holdings.ticker=Stock_Prices.ticker " +
-				"GROUP BY PID) AS stock_value, portfolio WHERE portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10"),
+						 "FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS VALUES FROM Stock_Holdings, Stock_Prices WHERE Stock_Holdings.ticker=Stock_Prices.ticker " +
+						 "GROUP BY PID) AS stock_value, portfolio WHERE portfolio.PID = stock_value.PID ORDER BY Mkt_Value DESC LIMIT 10"),
 		GET_MARKET_VALUE("SELECT portfolio.PID, (SELECT SUM(Stock_Prices.Price*num_shares)+(SELECT cash FROM portfolio WHERE portfolio.PID=?) AS " +
-						"VALUES FROM Stock_Holdings, Stock_Prices WHERE Stock_Holdings.PID=? AND Stock_Holdings.ticker=Stock_Prices.ticker) AS Mkt_Value " +
-						"FROM portfolio WHERE PID=?"),
+						 "VALUES FROM Stock_Holdings, Stock_Prices WHERE Stock_Holdings.PID=? AND Stock_Holdings.ticker=Stock_Prices.ticker) AS Mkt_Value " +
+						 "FROM portfolio WHERE PID=?"),
+		GET_NUM_NON_NULL_MARKET_VALUES("SELECT count(*) FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS VALUES FROM Stock_Holdings, Stock_Prices " +
+									   "WHERE Stock_Holdings.ticker=Stock_Prices.ticker GROUP BY PID) AS mktvalue"),
 		GET_PID("SELECT PID FROM Portfolio WHERE username=? AND portfolio_name=?"),
 		GET_PORTFOLIO_INFO("SELECT portfolio_name, time_created, cash FROM Portfolio WHERE PID=?"),
 		GET_PORTFOLIO_NAMES("SELECT portfolio_name FROM Portfolio WHERE username=?"),
 		GET_PORTFOLIO_NAME_BY_PID("SELECT portfolio_name FROM Portfolio WHERE PID=?"),
 		GET_RANK("SELECT COUNT(portfolio.PID)+1 AS Rank FROM (SELECT PID, SUM(Stock_Prices.price*num_shares) AS values FROM stock_holdings, " +
-				"Stock_Prices WHERE stock_holdings.ticker=Stock_Prices.ticker GROUP BY PID) AS stock_value, portfolio WHERE portfolio.PID = " +
-				"stock_value.PID AND (portfolio.cash+stock_value.values)> ?"),
+				 "Stock_Prices WHERE stock_holdings.ticker=Stock_Prices.ticker GROUP BY PID) AS stock_value, portfolio WHERE portfolio.PID = " +
+				 "stock_value.PID AND (portfolio.cash+stock_value.values)> ?"),
 		GET_STOCK_HOLDINGS("SELECT ticker, num_shares, avg_price_bought FROM Stock_Holdings WHERE PID=?"),
 		GET_STOCK_TICKERS("SELECT DISTINCT ticker FROM Stock_Prices"),
 		GET_TOTAL_PORTFOLIO_NUM("SELECT COUNT(PID) FROM Portfolio"),
@@ -430,31 +432,54 @@ public class StockSimDB {
         }
     }
     
-    public List<Integer> getRanking(String PID) throws Exception{
-    	
-    	List<Integer> rank = new ArrayList<Integer>();
-    	updateStockPrices();
-    	BigDecimal mktvalue = getMktValue(PID);
-    	if(mktvalue==null) mktvalue=BigDecimal.valueOf(10000);
+    public int getNumNonNullMarketValues() throws Exception {
     	PreparedStatement ps = null;
 		ResultSet rs = null;
-		
 		try {
-			ps = _preparedStatements.get(PreparedStatementID.GET_RANK);
+			ps = _preparedStatements.get(PreparedStatementID.GET_NUM_NON_NULL_MARKET_VALUES);
 		    //ps.setString(1, PID);
-		    ps.setBigDecimal(1, mktvalue);
 		    rs = ps.executeQuery();
 		    rs.next();
-		    rank.add(rs.getInt(1));
-		    
-		    ps = null;
-		    rs = null;
+		    return rs.getInt(1);
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+		    //if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+		    //if (ps != null) try { ps.close(); } catch (SQLException ignore) {}
+		 }	    
+    }
+    
+    public List<Integer> getRanking(String PID) throws Exception{
+    	
+    	List<Integer> ranking = new ArrayList<Integer>();
+    	updateStockPrices();
+    	BigDecimal mktvalue = getMktValue(PID);
+    	if (mktvalue==null) {
+    		mktvalue=BigDecimal.valueOf(10000);
+    	}
+    	PreparedStatement ps = null;
+		ResultSet rs = null;
+		int total;
+		
+		try {
 		    ps = _preparedStatements.get(PreparedStatementID.GET_TOTAL_PORTFOLIO_NUM);
 		    rs = ps.executeQuery();
 		    rs.next();
-		    rank.add(rs.getInt(1));
+		    total = rs.getInt(1);
 		    
-		    return rank;
+		    ps = null;
+		    rs = null;
+			ps = _preparedStatements.get(PreparedStatementID.GET_RANK);
+		    ps.setBigDecimal(1, mktvalue);
+		    rs = ps.executeQuery();
+		    rs.next();
+		    int rank = rs.getInt(1);
+		    if (mktvalue.compareTo(BigDecimal.valueOf(10000)) < 0) {
+		    	rank += getNumNonNullMarketValues();
+		    }
+		    ranking.add(rank);
+		    ranking.add(total);
+		    return ranking;
 		} catch (SQLException e) {
 			throw e;
 		} finally {
