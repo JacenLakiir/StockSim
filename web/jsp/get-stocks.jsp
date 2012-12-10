@@ -25,7 +25,7 @@
   </header>
 
   <div class="content">
-<%@ page import="java.sql.SQLException, java.util.Collections, java.util.Arrays, java.util.List, java.util.ArrayList, db.YAPI_Reader" %>
+<%@ page import="java.sql.SQLException, java.util.Collections, java.util.Set, java.util.TreeSet, java.util.List, java.util.ArrayList, db.YAPI_Reader" %>
 
 <%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
@@ -38,8 +38,11 @@
 <%
     try {
        String stocks = request.getParameter("stocks");
+       Set<String> uniqueStocks = new TreeSet<String>();
+       Collections.addAll(uniqueStocks, stocks.split("\\s+"));
        List<String> tickers = new ArrayList<String>();
-       Collections.addAll(tickers, stocks.split("\\s+"));
+       tickers.addAll(uniqueStocks);
+       Collections.sort(tickers);
        
        String[] attrs = request.getParameterValues("attributes");
        List<String> quotes;
