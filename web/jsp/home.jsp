@@ -70,34 +70,46 @@
           <th>Portfolio</th>
           <th>Cash</th>
           <th>Market Value</th>
+          <th>Rank</th>
+          <th>Percentile</th>
         </tr>
 <%    for (int i = 0; i < allPortfolios.size(); i++) {
-        double totalMarketValue = allPortfolios.get(i).getCash().doubleValue();
-        String PID = allPortfolios.get(i).getPID();
-        Portfolio portfolio = db.getStock_Holdings(PID);
-        List<Stock> stockHoldings = portfolio.getStockHoldings();
-       
+      Portfolio portfolio = allPortfolios.get(i);
+        double totalMarketValue = portfolio.getCash().doubleValue();
+        String PID = portfolio.getPID();
+        
+        List<Stock> stockHoldings = db.getStock_Holdings(PID).getStockHoldings();
         List<String> tickers = new ArrayList<String>();
         for (int j = 0; j < stockHoldings.size(); j++) {
           tickers.add(stockHoldings.get(j).getTicker());
         }
-        
         if (tickers.size() > 0) {
           List<BigDecimal> prices = YAPI_Reader.getPrices(tickers);
           for (int j = 0; j < stockHoldings.size(); j++) {
             totalMarketValue += stockHoldings.get(j).getNumShares() * prices.get(j).doubleValue();
           }
         }
+        
+        List<Integer> rankStats = db.getRanking(PID);
+        int rank = rankStats.get(0);
+        int total = rankStats.get(1);
+        double percentile = ((double) total - rank) / total * 100;
 %>
       <tr>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          <a href="portfolio.jsp?pid=<%=PID%>"><%=allPortfolios.get(i).getName()%></a>
+          <a href="portfolio.jsp?pid=<%=PID%>"><%=portfolio.getName()%></a>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
-          $<%=allPortfolios.get(i).getCash() %>
+          $<%=portfolio.getCash() %>
         </td>
         <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
           $<%=String.format("%.2f", totalMarketValue) %>
+        </td>
+        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+          <%=rank + " / " + total %>
+        </td>
+        <td class=<%=(i % 2 == 0) ? "gr1" : "gr1alt"%>>
+          <%=String.format("%.0f", percentile) %>
         </td>
       </tr>
 <%    } %>
