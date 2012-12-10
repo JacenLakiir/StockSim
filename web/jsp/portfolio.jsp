@@ -84,7 +84,7 @@
 		      List<Stock> stockHoldings = portfolio.getStockHoldings();
 		      if (stockHoldings == null || stockHoldings.size() == 0) {
 %>
-            <p align="center">;
+            <p align="center">
 <%            out.println("Empty portfolio - no stocks held."); %>
             </p>
 <%        }
