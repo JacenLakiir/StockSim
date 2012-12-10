@@ -37,9 +37,11 @@
 <h3 align="center">Stock Data</h3>
 <%
     try {
-       String stocks = request.getParameter("stocks");
+       String[] stocks = request.getParameter("stocks").split("\\s+");
        Set<String> uniqueStocks = new TreeSet<String>();
-       Collections.addAll(uniqueStocks, stocks.split("\\s+"));
+       for (String s : stocks) {
+         uniqueStocks.add(s.toUpperCase());
+       }
        List<String> tickers = new ArrayList<String>();
        tickers.addAll(uniqueStocks);
        Collections.sort(tickers);
