@@ -8,6 +8,8 @@ import javax.sql.*;
 
 import javax.naming.*;
 
+import org.postgresql.util.PGInterval;
+
 public class StockSimDB {
 
 	protected Connection con = null;
@@ -26,7 +28,7 @@ public class StockSimDB {
 		CREATE_NEW_PORTFOLIO("INSERT INTO Portfolio VALUES(?, ?, ?, ?, ?);"),
 		AUTH_LOGIN("SELECT username FROM Users WHERE username=? AND password=?"),
 		PERFORM_TRANSACTION("INSERT INTO Transaction VALUES(?, ?, ?, ?, ?, now())"),
-		GET_TRANSACTION_HISTORY_BY_TIME("SELECT * FROM Transaction WHERE PID=? AND time>=(now()-INTERVAL ? DAY) ORDER BY time DESC"),
+		GET_TRANSACTION_HISTORY_BY_TIME("SELECT * FROM Transaction WHERE PID=? AND time>=(now()-?) ORDER BY time DESC"),
 		GET_TRANSACTION_HISTORY_BY_NUMBER("SELECT * FROM Transaction WHERE PID=? ORDER BY time DESC LIMIT ?"),
 		GET_STOCK_HOLDINGS("SELECT ticker, num_shares, avg_price_bought FROM Stock_Holdings WHERE PID=?"),
 		GET_PORTFOLIO_NAMES("SELECT portfolio_name FROM Portfolio WHERE username=?"),
@@ -212,18 +214,19 @@ public class StockSimDB {
     }
     
     public List<Transaction> getTransactionHistoryByTime(String PID, int numDays) throws SQLException{
-   	 PreparedStatement ps = null;
-   	 ResultSet rs = null;
+    	PreparedStatement ps = null;
+   	 	ResultSet rs = null;
         try {
-       	 
-       	 ps = _preparedStatements.get(PreparedStatementID.GET_TRANSACTION_HISTORY_BY_TIME);
+       	 	ps = _preparedStatements.get(PreparedStatementID.GET_TRANSACTION_HISTORY_BY_TIME);
             ps.setString(1, PID);
-            ps.setInt(2, numDays);
+            PGInterval interval = new PGInterval();
+            interval.setDays(numDays);
+            ps.setObject(2, interval);
             rs = ps.executeQuery();
             List<Transaction> transactions = new ArrayList<Transaction>();
             while (rs.next()) {
-           	 Transaction t = new Transaction(rs.getString(1), rs.getString(2), rs.getInt(3), rs.getBigDecimal(4), rs.getString(5), rs.getTimestamp(6));
-           	 transactions.add(t);
+           	 	Transaction t = new Transaction(rs.getString(1), rs.getString(2), rs.getInt(3), rs.getBigDecimal(4), rs.getString(5), rs.getTimestamp(6));
+           	 	transactions.add(t);
             }
             return transactions;
         } catch (SQLException e) {

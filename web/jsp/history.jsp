@@ -36,7 +36,7 @@
         <h3 align="center">Transaction History</h3>
         
     
-<%@ page import="java.sql.SQLException, java.util.List, java.math.BigDecimal, db.Transaction" %>
+<%@ page import="java.sql.SQLException, java.util.List, java.util.ArrayList, java.math.BigDecimal, db.Transaction" %>
 
 <%-- The following locates object "db" of type "db.StockSimDB" from the
      current session.  We have created this object in the listener
@@ -46,11 +46,57 @@
 <jsp:useBean id="db" type="db.StockSimDB" scope="session"/>
         
 <%  try {
-      String PID = (String) request.getParameter("pid");
-      List<Transaction> history = db.getTransactionHistoryByNumber(PID, 5);
-      if (history == null || history.size() == 0) {
+      String PID = request.getParameter("pid");
+      String filter = request.getParameter("filter");
+      String numTransactions = request.getParameter("numTransactions");
+      String timeframe = request.getParameter("timeframe");
+      
+      List<Transaction> history = new ArrayList<Transaction>();
+      if (filter == null) {
+        history = db.getTransactionHistoryByNumber(PID, 5);
 %>
-        <p>
+    <p align="center">
+<%        out.println("Showing the 5 most recent transactions:"); %>
+    </p>
+<%    }
+      else if (filter.equals("numTransactions") && numTransactions != null) {
+      history = db.getTransactionHistoryByNumber(PID, Math.abs(Integer.parseInt(numTransactions)));
+%>
+    <p align="center">
+<%        out.println("Showing the " + numTransactions + " most recent transactions:"); %>
+    </p>
+<%    }
+      else if (filter.equals("timeframe") && timeframe != null) {
+      int numDays = 0;
+        if (timeframe.equals("week")) {
+          numDays = 7;
+        } else if (timeframe.equals("month")) {
+          numDays = 30;
+        } else if (timeframe.equals("3 months")) {
+          numDays = 90;
+        } else if (timeframe.equals("year")) {
+          numDays = 365;
+        }
+      history = db.getTransactionHistoryByTime(PID, numDays);
+      %>
+    <p align="center">
+<%        out.println("Showing transactions from within the past " + timeframe + ":"); %>
+    </p>
+<%   }
+      
+      if (history == null) {
+%>
+        <p align="center">
+<%        out.println("Empty history - no transactions performed yet."); %>
+        </p>
+<%    } else if (history.size() == 0 && timeframe != null) {
+%>
+        <p align="center">
+<%        out.println("No transactions took place within the last " + timeframe + "."); %>
+        </p>
+<%    } else if (history.size() == 0) {
+%>
+        <p align="center">
 <%        out.println("Empty history - no transactions performed yet."); %>
         </p>
 <%    } else { %>
@@ -84,25 +130,31 @@
           <div align="center">
             <fieldset align="left">
               <legend>Show: </legend>
+              <form name="history" action="history.jsp" method="get">
+                <input type="hidden" name="pid" value=<%=request.getParameter("pid") %>>
                 <input type="radio" name="filter" value="numTransactions" checked="checked">
                   <label>
-                    <select>
-                      <option value="1">5</option>
-                      <option value="2">10</option>
-                      <option value="3">25</option>
-                      <option value="4">50</option>
-                      <option value="5">100</option>
+                    <select name="numTransactions">
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
                     </select> most recent transactions
                   </label><br>
-                <input type="radio" name="filter" value="numDays">
+                <input type="radio" name="filter" value="timeframe">
                   <label> past
-                    <select>
-                      <option value="1">week</option>
-                      <option value="2">month</option>
-                      <option value="3">3 months</option>
-                      <option value="4">year</option>
+                    <select name="timeframe">
+                      <option value="week">week</option>
+                      <option value="month">month</option>
+                      <option value="3 months">3 months</option>
+                      <option value="year">year</option>
                     </select> of transactions
                   </label>
+                <p align="center">
+                <input type="submit" value="Update">
+                </p>
+              </form>
             </fieldset>    
           </div>      
         </p>
@@ -124,7 +176,7 @@
         <a href="portfolio.jsp?pid=<%=PID %>">Return to portfolio.</a>
       </p>
 <%  } catch (Exception e) {
-	      out.println(e);
+        out.println(e);
     }
 %>  
       </div>
