@@ -11,6 +11,7 @@ DROP TABLE Users CASCADE;
 DROP TABLE Portfolio CASCADE;
 DROP TABLE Stock_Holdings CASCADE;
 DROP TABLE Transaction CASCADE;
+DROP TABLE Stock_Prices CASCADE;
 DROP FUNCTION exec_Transaction() CASCADE;
 DROP FUNCTION check_Portfolio_Name() CASCADE;
 
@@ -38,7 +39,7 @@ CREATE TABLE Stock_Holdings(
 );
 
 CREATE TABLE Stock_Prices(
-  ticker VARCHAR(10) NOT NULL,
+  ticker VARCHAR(10) NOT NULL PRIMARY KEY,
   price NUMERIC(1000,2) NOT NULL
 );
 
